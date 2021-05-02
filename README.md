@@ -8,7 +8,7 @@ Current aim is:
 - read the colour values off a screen
 - send them to the microcontroller
 - light up the LEDs accordingly
-    - kind of like Logitech lighsynchc but simpler
+    - kind of like Logitech lighsync but simpler
 
 ## Requirements
 
