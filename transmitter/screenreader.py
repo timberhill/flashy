@@ -9,6 +9,9 @@ class ScreenReader:
 
     Using 'windll.gdi32.GetPixel' function
     Docs: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getpixel
+
+    Attributes:
+        logger (logging.Logger): build-in python logger instance
     """
     def __init__(self):
         self._dc = windll.user32.GetDC(0)
@@ -16,13 +19,13 @@ class ScreenReader:
         self.logger.debug(f"created")
 
     def get_pixel_value(self, coords):
-        """
-        Get an RGB value of a scren pixel
+        """Get an RGB value of a screen pixel
 
-        Parameters:
+        Args:
+            coords (tuple): x and y coordinates of the pixel
 
-            coords, tuple:
-                x and y coordinates of the pixel
+        Returns:
+            tuple: 3 RGB values
         """
         return tuple(int.to_bytes(
             windll.gdi32.GetPixel(self._dc, *coords),
@@ -31,19 +34,15 @@ class ScreenReader:
         ))
 
     def get_region_value(self, topleft, bottomright, kind="mean"):
-        """
-        Get an RGB value of a screen region using windll.gdi32.GetPixel
+        """Get an RGB value of a screen region using windll.gdi32.GetPixel
 
-        Parameters:
+        Args:
+            topleft (tuple): x and y coordinates of top left pixel of the region
+            bottomright (tuple): x and y coordinates of top left pixel of the region
+            kind (str): averaging kind, "median" or "mean"
 
-            topleft, tuple:
-                x and y coordinates of top left pixel of the region
-
-            bottomright, tuple:
-                x and y coordinates of top left pixel of the region
-
-            kind, str:
-                averaging kind, "median" or "mean"
+        Returns:
+            tuple: 3 RGB values
         """
         start = time.time()
 
@@ -61,19 +60,14 @@ class ScreenReader:
         )
 
     def _colorref_to_rgb(self, value):
-        """
-        Convert the COLORREF value into an RGB tuple.
+        """Convert the COLORREF value into an RGB tuple.
         Docs: https://docs.microsoft.com/en-us/windows/win32/gdi/colorref
 
-        Parameters:
-
-            value, int:
-                COLORREF value
+        Args:
+            value (int): COLORREF value
             
         Returns:
-
-            rgb, tuple:
-                a three-part RGB tuple
+            tuple: 3 RGB values
         """
         if value < 0:
             return (0, 0, 0)
@@ -85,20 +79,14 @@ class ScreenReader:
         ))
     
     def _average_rgb(self, arr, kind):
-        """
-        Calculate an average value of an array of RGB values.
+        """Calculate an average value of an array of RGB values.
 
-        Parameters:
-
-            arr, list:
-                list of RGB tuples (0..255)
-
-            kind, str:
-                averaging kind, "median" or "mean"
+        Args:
+            arr (list): list of RGB tuples (0..255)
+            kind (str): averaging kind, "median" or "mean"
         
         Returns:
-
-            tuple, an average RGB
+            tuple: 3 RGB values
         """
         if kind not in ["mean", "median"]:
             self.logger.warn(f"unexpected kind of averaging: '{kind}', calculating mean value instead")
@@ -110,17 +98,13 @@ class ScreenReader:
             return self._median_rgb(arr)
     
     def _mean_rgb(self, arr):
-        """
-        Calculate a mean value of an array of RGB values.
+        """Calculate a mean value of an array of RGB values.
 
-        Parameters:
-
-            arr, list:
-                list of RGB tuples (0..255)
+        Args:
+            arr (list): list of RGB tuples (0..255)
 
         Returns:
-
-            tuple, a mean RGB
+            tuple: 3 RGB values
         """
         N = len(arr)    
         return (
@@ -130,17 +114,13 @@ class ScreenReader:
         )
     
     def _median_rgb(self, arr):
-        """
-        Calculate a median value of an array of RGB values.
+        """Calculate a median value of an array of RGB values.
 
-        Parameters:
-
-            arr, list:
-                list of RGB tuples (0..255)
+        Args:
+            arr (list): list of RGB tuples (0..255)
         
         Returns:
-
-            tuple, a median RGB
+            tuple: 3 RGB values
         """
         N = len(arr) 
         r_sorted = sorted(value[0] for value in arr)
