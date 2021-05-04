@@ -26,6 +26,7 @@ class AppMain:
             baud=settings["baud"],
             strip_size=settings["strip_size"]
         )
+
         self.screen = ScreenReader()
 
         self.logger = logging.getLogger("AppMain")
@@ -36,7 +37,7 @@ class AppMain:
         Function containing the main loop.
         """
         while True:  # this is all hardcoded for now
-            r, g, b = self.screen.get_region_value((1024, 510), (1025, 520), "mean")
+            r, g, b = self.screen.get_region_value((1280, 1380), (1281, 1390), "mean")
             self.serial.send([(0, r, g, b)])
             time.sleep(0.01)
 
