@@ -14,10 +14,12 @@ class SerialTransmitter:
     
     Args:
         port (str): serial port name
-        baud (int): serial BAUD rate
+        strip_size (int, optional): number of pixels in the LED strip
+        baud (int, optional): serial BAUD rate
     """
-    def __init__(self, port, baud=9600):
+    def __init__(self, port, strip_size=1, baud=9600):
         self.port = port
+        self.strip_size = strip_size
         self.serial = Serial(port, baud)
         self.logger = logging.getLogger("SerialTransmitter")
         self.logger.debug(f"created: port={port}, baud={baud}, strip_size={strip_size}")

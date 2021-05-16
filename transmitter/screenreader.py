@@ -1,5 +1,4 @@
 import logging
-import time
 from ctypes import windll
 
 
@@ -27,37 +26,31 @@ class ScreenReader:
         Returns:
             tuple: 3 RGB values
         """
-        return tuple(int.to_bytes(
-            windll.gdi32.GetPixel(self._dc, *coords),
-            length=3,
-            byteorder="little"
-        ))
+        return self._colorref_to_rgb(
+            windll.gdi32.GetPixel(self._dc, *coords)
+        )
 
-    def get_region_value(self, topleft, bottomright, kind="mean"):
-        """Get an RGB value of a screen region using windll.gdi32.GetPixel
+    def get_average_pixel_value(self, topleft, bottomright=None, kind="mean"):
+        """Get an average RGB value of a screen region using windll.gdi32.GetPixel
 
         Args:
             topleft (tuple): x and y coordinates of top left pixel of the region
-            bottomright (tuple): x and y coordinates of top left pixel of the region
-            kind (str): averaging kind, "median" or "mean"
+            bottomright (tuple, optional): x and y coordinates of top left pixel of the region
+            kind (str, optional): averaging kind, "median" or "mean"
 
         Returns:
             tuple: 3 RGB values
         """
-        start = time.time()
+        if bottomright is None:
+            bottomright = (topleft[0]+1, topleft[1]+1)
 
-        values = []
-        for x in range(topleft[0], bottomright[0]):
-            for y in range(topleft[1], bottomright[1]):
-                values.append(windll.gdi32.GetPixel(self._dc, x, y))
+        pixel_values = [
+            self._colorref_to_rgb(windll.gdi32.GetPixel(self._dc, x, y))
+            for x in range(topleft[0], bottomright[0])
+            for y in range(topleft[1], bottomright[1])
+        ]
         
-        read_ms, len_values = (time.time()-start)*1000, len(values)
-        self.logger.debug(f"read {len_values} pixels in {read_ms:0.1f}ms ({read_ms/len_values:0.1f} ms/px)")
-        
-        return self._average_rgb(
-            arr=[self._colorref_to_rgb(value) for value in values],
-            kind=kind
-        )
+        return self._average_rgb(arr=pixel_values, kind=kind)
 
     def _colorref_to_rgb(self, value):
         """Convert the COLORREF value into an RGB tuple.

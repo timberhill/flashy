@@ -25,13 +25,3 @@ Some coding exp because this project is in its infancy. Feel free to contact me 
 I use Adafruit Flora as it is the one I had lying around.
 It can be any Arduino board that supports serial communication though - might just need to update the [onboard code](receiver/receiver.ino).
 Currently it just uses the onboard LED as a test, but eventually it will use an LED strip with as many pixels as you can power.
-
-
-## TO DO
-
-- Figure out the most efficient way of getting the pixel data off the screen (Windows only for now)
-- Create a settings file and manager (possibly json?)
-- Create "profiles" support - files with the LED-pixel to screen pixel relations
-- Optimise getting the screen data from profiles to not read the pixel data twice
-
-    ...
