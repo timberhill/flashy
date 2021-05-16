@@ -13,8 +13,6 @@ class Settings:
         path (str, optional): path to settings.json, defaults to 'settings/settings.json'
     """
     def __init__(self, path="settings\\settings.json"):
-        """
-        """
         self.settings_path = path
         self.load(path)
 
@@ -62,7 +60,51 @@ class Settings:
 
 
 class Profile:
-    """
+    """Class containing the profile json data.
+
+    Args:
+        json_data (dict): contents of the profile json file
     """
     def __init__(self, json_data):
-        self.json_data = json_data
+        self.fields = [
+            {"name": "description", "type": str},
+            {"name": "display", "type": dict},
+            {"name": "map", "type": list},
+        ]
+
+        self._validate(json_data)
+        json_data = self._normalise(json_data)
+        for key, value in json_data.items():
+            setattr(self, key, value)
+    
+    def _validate(self, json_data):
+        """Validate the profile json.
+
+        Args:
+            json_data (dict): contents of the profile json file
+        
+        Raises:
+            KeyError: missing key in the input data
+            TypeError: value has a wrong type
+        """
+        for field in self.fields:
+            name = field.get("name")
+            if name not in json_data:
+                raise KeyError(f"Field missing from the profile: '{name}'")
+            if not isinstance(json_data[name], field.get("type")):
+                raise TypeError(f"Field missing from the profile: '{name}'")
+        
+    def _normalise(self, json_data):
+        """Normalise the values.
+
+        Args:
+            json_data (dict): contents of the profile json file
+        """
+        for i in range(len(json_data["map"])):
+            # if it's just a single pixel, draw a single pixel box
+            if len(json_data["map"][i]) == 2:
+                json_data["map"][i] = [
+                    json_data["map"][i][0], json_data["map"][i][1],
+                    json_data["map"][i][0]+1, json_data["map"][i][1]+1
+                ]
+        return json_data

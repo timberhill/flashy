@@ -21,7 +21,7 @@ class AppMain:
     """
     def __init__(self, settings):
         if not hasattr(settings, "port") or settings.port is None:
-            settings.port = self.serial_ports[0]["device"]
+            settings.port = self.serial_ports[0].device
 
         self.logger = logging.getLogger("AppMain")
         self.between_frames_ms = settings.between_frames_ms
@@ -41,13 +41,7 @@ class AppMain:
         Returns:
             list: list of dictionaries like {"device": "COM1", "description": "something here"}
         """
-        return [
-            dict(
-                device=port.device,
-                description=port.description
-            )
-            for port in list(serial.tools.list_ports.comports())
-        ]
+        return list(serial.tools.list_ports.comports())
     
     def start(self):
         """Function containing the main loop.

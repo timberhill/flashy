@@ -5,8 +5,8 @@ from .appmain import AppMain
 from .settings import Settings
 
 
-settings = Settings("settings/settings.json").load()
-
+# read the settings file
+settings = Settings("settings/settings.json")
 
 logging.basicConfig(
     level=settings.log_level,
