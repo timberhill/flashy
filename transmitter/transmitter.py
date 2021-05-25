@@ -45,7 +45,7 @@ class SerialTransmitter:
         Args:
             data (list): a list of tuples containing the LED index and RGB values in a tuple.
         """
-        self.logger.debug(f"sending {len(data)} items to {self.port}")
+        # self.logger.info(f"sending {data} to {self.port}")
         for i, item in enumerate(data):
             string_data = self._output_format(item)
             self.logger.debug(f"sending {i+1}/{len(data)}: '{string_data}'")

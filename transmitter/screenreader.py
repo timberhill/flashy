@@ -30,7 +30,7 @@ class ScreenReader:
             windll.gdi32.GetPixel(self._dc, *coords)
         )
 
-    def get_average_pixel_value(self, topleft, bottomright=None, kind="mean"):
+    def get_average_pixel_value(self, bbox, kind="mean"):
         """Get an average RGB value of a screen region using windll.gdi32.GetPixel
 
         Args:
@@ -41,16 +41,15 @@ class ScreenReader:
         Returns:
             tuple: 3 RGB values
         """
-        if bottomright is None:
-            bottomright = (topleft[0]+1, topleft[1]+1)
-
         pixel_values = [
-            self._colorref_to_rgb(windll.gdi32.GetPixel(self._dc, x, y))
-            for x in range(topleft[0], bottomright[0])
-            for y in range(topleft[1], bottomright[1])
+            windll.gdi32.GetPixel(self._dc, x, y)
+            for x in range(bbox[0], bbox[2])
+            for y in range(bbox[1], bbox[3])
         ]
-        
-        return self._average_rgb(arr=pixel_values, kind=kind)
+
+        return self._average_rgb(
+            arr=[self._colorref_to_rgb(value) for value in pixel_values],
+            kind=kind)
 
     def _colorref_to_rgb(self, value):
         """Convert the COLORREF value into an RGB tuple.
@@ -63,7 +62,7 @@ class ScreenReader:
             tuple: 3 RGB values
         """
         if value < 0:
-            return (0, 0, 0)
+            return (-1, -1, -1)
 
         return tuple(int.to_bytes(
             value,
