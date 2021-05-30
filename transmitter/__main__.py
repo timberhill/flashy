@@ -1,21 +1,63 @@
-import sys
 import logging
+import sys
+import serial.tools.list_ports
 
-from .appmain import AppMain
+from .queue_array import QueueArray
+from .screen_reader_async import ScreenReaderAsync
+from .serial_transmitter_async import SerialTransmitterAsync
 from .settings import Settings
 
-
-# read the settings file
-settings = Settings("settings/settings.json")
-
 logging.basicConfig(
-    level=settings.log_level,
-    format='time=%(asctime)s, level=%(levelname)s, location=%(filename)s:%(lineno)d, message=\"%(message)s\"',
-    handlers=[
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s:%(name)s:%(filename)s:%(lineno)d - %(message)s',
+    handlers=[ 
         logging.FileHandler(filename='flashy.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
 
-# Start the app
-AppMain(settings).start()
+
+if __name__ == '__main__':
+    logger = logging.getLogger("__main__")
+    settings = Settings("settings/settings.json")
+
+    logger.info("Starting with settings below:")
+
+    if settings.port is None:
+        settings.port = serial.tools.list_ports.comports()[0].device
+        logger.info(f"Serial port:      {settings.port} (autodetected)")
+    else:
+        logger.info(f"Serial port:      {settings.port}")
+
+    logger.info(f"Baud rate:        {settings.baud}")
+    logger.info(f"Threads:          {settings.threads}")
+    logger.info(f"Strip size:       {settings.strip_size}")
+    logger.info(f"Log level:        {settings.log_level}")
+    logger.info(f"Between frames:   {settings.between_frames_ms} ms")
+    logger.info(f"Profile:          {settings.profile.description}")
+
+    # set up the queue
+    queue = QueueArray(length=settings.strip_size, size=5)
+
+    # create the threads
+    for i in range(settings.threads):
+        index_range = [
+            i * settings.strip_size//settings.threads,
+            (i+1) * settings.strip_size//settings.threads
+        ]
+
+        reader = ScreenReaderAsync(
+            name=f'ScreenReader{i}:{index_range}',
+            index_range=index_range,
+            queue=queue,
+            led_map=settings.profile.map
+        )
+        reader.start()
+
+    transmitter = SerialTransmitterAsync(
+        name='SerialTransmitter',
+        queue=queue,
+        port=settings.port,
+        baud=settings.baud
+    )
+    transmitter.start()
