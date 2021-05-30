@@ -1,5 +1,6 @@
 import logging
 import sys
+import time
 import serial.tools.list_ports
 
 from .queue_array import QueueArray
@@ -12,7 +13,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s:%(name)s:%(filename)s:%(lineno)d - %(message)s',
     handlers=[ 
         logging.FileHandler(filename='flashy.log'),
-        logging.StreamHandler(sys.stdout)
+        # logging.StreamHandler(sys.stdout)
     ]
 )
 
@@ -52,6 +53,7 @@ if __name__ == '__main__':
             queue=queue,
             led_map=settings.profile.map
         )
+        reader.daemon = True
         reader.start()
 
     transmitter = SerialTransmitterAsync(
@@ -60,4 +62,9 @@ if __name__ == '__main__':
         port=settings.port,
         baud=settings.baud
     )
+    transmitter.daemon = True
     transmitter.start()
+
+    # keep the main thread alive while the daemons are working
+    while True:
+        time.sleep(3600)
