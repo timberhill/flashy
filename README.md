@@ -74,6 +74,11 @@ Below are descriptions of the fields.
     Must be less that the number of the LEDs.
     It takes about 15ms to read a pixel value, so use less than 5 threads per LED.
 
+`"frame_delay": 10,`
+
+    ^ delay between frames in milliseconds.
+    Keep it at least 1ms for the CPU usage to stay low.
+
 `"profile": "profiles\\bottom1_2560x1440.json"`
 
     ^ path to the profile to use.

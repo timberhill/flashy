@@ -2,6 +2,7 @@ import threading
 import logging
 import random
 from ctypes import windll
+import time
 
 
 class ScreenReaderAsync(threading.Thread):
@@ -22,13 +23,14 @@ class ScreenReaderAsync(threading.Thread):
         index_order (list): list of indices in the index_range in a random order
         logger (Logger): logger object used to write logs from this thread
     """
-    def __init__(self, name=None, index_range=[], queue=None, led_map=[]):
+    def __init__(self, name=None, index_range=[], queue=None, led_map=[], frame_delay=1.0):
         super(ScreenReaderAsync, self).__init__()
         self.name = name
         self.dc = windll.user32.GetDC(None)
         self.index_range = index_range
         self.queue = queue
         self.led_map = led_map
+        self.frame_delay = float(frame_delay)
         self.index_order = list(range(self.index_range[0], self.index_range[1]))
         random.shuffle(self.index_order)
         self.logger = logging.getLogger(self.name)
@@ -38,6 +40,7 @@ class ScreenReaderAsync(threading.Thread):
         """
         self.logger.info("Started screen reader")
         while True:
+            time.sleep(self.frame_delay/1000)
             for i in self.index_order:
                 item = self.get_pixel(self.led_map[i])
                 if item is not None:

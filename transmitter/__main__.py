@@ -3,7 +3,7 @@ Entry point of flashy
 """
 
 import logging
-import sys
+# import sys
 import time
 import serial.tools.list_ports
 
