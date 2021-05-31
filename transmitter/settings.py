@@ -8,6 +8,7 @@ class Settings:
 
     Attributes:
         path (string): path to the settings.json
+        + All the settings fields
 
     Args:
         path (str, optional): path to settings.json, defaults to 'settings/settings.json'
@@ -68,7 +69,6 @@ class Profile:
     def __init__(self, json_data):
         self.fields = [
             {"name": "description", "type": str},
-            {"name": "display", "type": dict},
             {"name": "map", "type": list},
         ]
 

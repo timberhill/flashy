@@ -3,7 +3,6 @@
     "baud": 9600,
     "strip_size": 15,
     "log_level": "INFO",
-    "between_frames_ms": -1,
-    "threads": 4,
+    "threads": 1,
     "profile": "profiles\\bottom1_2560x1440.json"
 }

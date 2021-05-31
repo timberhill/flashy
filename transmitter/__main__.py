@@ -1,3 +1,7 @@
+"""
+Entry point of flashy
+"""
+
 import logging
 import sys
 import time
@@ -20,6 +24,8 @@ logging.basicConfig(
 
 if __name__ == '__main__':
     logger = logging.getLogger("__main__")
+
+    # read the settings file
     settings = Settings("settings/settings.json")
 
     logger.info("Starting with settings below:")
@@ -34,13 +40,12 @@ if __name__ == '__main__':
     logger.info(f"Threads:          {settings.threads}")
     logger.info(f"Strip size:       {settings.strip_size}")
     logger.info(f"Log level:        {settings.log_level}")
-    logger.info(f"Between frames:   {settings.between_frames_ms} ms")
     logger.info(f"Profile:          {settings.profile.description}")
 
     # set up the queue
     queue = QueueArray(length=settings.strip_size, size=5)
 
-    # create the threads
+    # create the reader threads
     for i in range(settings.threads):
         index_range = [
             i * settings.strip_size//settings.threads,
@@ -56,6 +61,7 @@ if __name__ == '__main__':
         reader.daemon = True
         reader.start()
 
+    # create the transmitter thread
     transmitter = SerialTransmitterAsync(
         name='SerialTransmitter',
         queue=queue,

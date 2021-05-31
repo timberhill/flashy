@@ -2,10 +2,6 @@
     "__comment": "'map' field contains a list of [x,y] coordinates on the screen pixel values to send into the corresponding LED index",
 
     "description": "Row of pixels at the bottom of the screen, covering middle third of the length",
-    "display": {
-        "x": 2560,
-        "y": 1440
-    },
     "map": [
         [720,  1385],
         [791,  1385],
