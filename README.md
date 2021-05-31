@@ -11,6 +11,9 @@ Current aim is:
 - light up the LEDs accordingly
 - PROFIT
 
+### Demo:
+[![FLASHY demo](https://img.youtube.com/vi/ytjLecwWzHU/0.jpg)](https://www.youtube.com/watch?v=ytjLecwWzHU "FLASHY demo")
+
 ## Requirements
 
 Some coding exp because this project is in its infancy.
