@@ -6,6 +6,6 @@
 - [ ] investigate [ImageGrab](https://www.geeksforgeeks.org/pyhton-pil-imagegrab-grab-method/)
 - [ ] investigate [SDL](https://stackoverflow.com/questions/1934151/direct-screen-pixel-framebuffer-access)
 - [ ] add a script for the non-addressable LEDs
-- [x] optimize the serial transmitter (use base 16?)
+- [x] optimize the serial transmitter (use base 16 or just skip?)
 - [x] check out bauds
-- [ ] add multiple pixels per led option
+- [x] add multiple pixels per led option
