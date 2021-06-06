@@ -2,8 +2,10 @@
 
 - [ ] make the script run as a service
 - [x] document the code and update the readme
-- [ ] Figure out the optimal [DC stuff](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdc)
+- [x] Figure out the optimal [DC stuff](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdc)
 - [ ] investigate [ImageGrab](https://www.geeksforgeeks.org/pyhton-pil-imagegrab-grab-method/)
 - [ ] investigate [SDL](https://stackoverflow.com/questions/1934151/direct-screen-pixel-framebuffer-access)
 - [ ] add a script for the non-addressable LEDs
-- [ ] optimize the serial transmitter (use base 16?)
+- [x] optimize the serial transmitter (use base 16?)
+- [x] check out bauds
+- [ ] add multiple pixels per led option

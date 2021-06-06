@@ -56,7 +56,7 @@ if __name__ == '__main__':
             name=f'ScreenReader{i}:{index_range}',
             index_range=index_range,
             queue=queue,
-            led_map=settings.profile.map
+            settings=settings
         )
         reader.daemon = True
         reader.start()

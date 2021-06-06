@@ -1,9 +1,9 @@
 {
     "port": null,
-    "baud": 9600,
+    "baud": 56000,
     "strip_size": 15,
     "log_level": "CRITICAL",
-    "threads": 1,
+    "threads": 15,
     "frame_delay": 10,
-    "profile": "profiles\\bottom1_2560x1440.json"
+    "profile": "profiles\\bottomthird_2560x1440.json"
 }

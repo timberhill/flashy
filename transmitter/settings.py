@@ -59,6 +59,24 @@ class Settings:
         else:
             raise ValueError("Profile value in the settings must be either a json or a path to a json file")
 
+    def get_pixel_list(self, index):
+        """Return a map item by the index
+
+        Args:
+            index (int): index of the map
+
+        Returns:
+            coords (list): list of pixel coordinates
+
+        Raises:
+            KeyError: index not in the map
+
+        """
+        coords = self.profile.map.get(str(index), None)
+        if coords is None:
+            raise KeyError(f"Key {index} does not appear in the map")
+        return coords["pixels"]
+
 
 class Profile:
     """Class containing the profile json data.
@@ -67,11 +85,6 @@ class Profile:
         json_data (dict): contents of the profile json file
     """
     def __init__(self, json_data):
-        self.fields = [
-            {"name": "description", "type": str},
-            {"name": "map", "type": list},
-        ]
-
         self._validate(json_data)
         json_data = self._normalise(json_data)
         for key, value in json_data.items():
@@ -87,12 +100,15 @@ class Profile:
             KeyError: missing key in the input data
             TypeError: value has a wrong type
         """
-        for field in self.fields:
-            name = field.get("name")
-            if name not in json_data:
-                raise KeyError(f"Field missing from the profile: '{name}'")
-            if not isinstance(json_data[name], field.get("type")):
-                raise TypeError(f"Field missing from the profile: '{name}'")
+        for required_key in ["description", "map"]:
+            if required_key not in json_data:
+                raise KeyError(f"Field missing from the profile: '{required_key}'")
+
+        for key, value in json_data.get("map").items():
+            if not key.isdigit():
+                raise KeyError(f"Illegal map key: '{key}'. Must be an integer.")
+            if not isinstance(value, (dict, list)):
+                raise TypeError(f"Illegal map value: '{value}'.")
         
     def _normalise(self, json_data):
         """Normalise the values.
@@ -100,11 +116,20 @@ class Profile:
         Args:
             json_data (dict): contents of the profile json file
         """
-        for i in range(len(json_data["map"])):
-            # if it's just a single pixel, draw a single pixel box
-            if len(json_data["map"][i]) == 2:
-                json_data["map"][i] = [
-                    json_data["map"][i][0], json_data["map"][i][1],
-                    json_data["map"][i][0]+1, json_data["map"][i][1]+1
-                ]
+        for map_index, map_value in json_data.get("map").items():
+            if isinstance(map_value, list):
+                json_data["map"][map_index] = {"pixels": map_value}
+            elif "pixels" in map_value:
+                continue
+            elif "bbox" in map_value:
+                if map_value["bbox"][0] <= map_value["bbox"][2]:
+                     map_value["bbox"][2] = map_value["bbox"][0] + 1
+                if map_value["bbox"][1] <= map_value["bbox"][3]:
+                     map_value["bbox"][3] = map_value["bbox"][1] + 1
+                json_data["map"][map_index]["pixels"] = [
+                        (x, y)
+                        for x in range(map_value["bbox"][0], map_value["bbox"][2])
+                        for y in range(map_value["bbox"][1], map_value["bbox"][3])
+                    ]
+
         return json_data
