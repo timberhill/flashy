@@ -115,6 +115,9 @@ class Profile:
 
         Args:
             json_data (dict): contents of the profile json file
+        
+        Returns:
+            json_data (dict): better, improved contents of the profile json file
         """
         for map_index, map_value in json_data.get("map").items():
             if isinstance(map_value, list):
@@ -122,6 +125,7 @@ class Profile:
             elif "pixels" in map_value:
                 continue
             elif "bbox" in map_value:
+
                 if map_value["bbox"][0] <= map_value["bbox"][2]:
                      map_value["bbox"][2] = map_value["bbox"][0] + 1
                 if map_value["bbox"][1] <= map_value["bbox"][3]:
