@@ -8,6 +8,7 @@ class Settings:
     Contains all the top level settings values as class attributes
 
     Attributes:
+        logger (logging.Logger): settings logger object
         path (string): path to the settings.json
         + All the settings fields
 
@@ -17,7 +18,7 @@ class Settings:
     def __init__(self, path="settings\\settings.json"):
         self.settings_path = path
         self.settings_dir = os.path.dirname(self.settings_path)
-        self.logger = logging.getLogger(self.name)
+        self.logger = logging.getLogger("Settings")
         self.load(path)
 
     def load(self, path=None):
@@ -30,6 +31,7 @@ class Settings:
             settings (Settings): this object with the attributed loaded
         """
         path = self.settings_path if path is None else path
+        self.logger.info(f"Reading settings from {path}")
         with open(path, "r") as settings_file:
             # set all the settings as class attributes
             for key, value in json.load(settings_file).items():
