@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 
 
 class Settings:
@@ -15,6 +16,8 @@ class Settings:
     """
     def __init__(self, path="settings\\settings.json"):
         self.settings_path = path
+        self.settings_dir = os.path.dirname(self.settings_path)
+        self.logger = logging.getLogger(self.name)
         self.load(path)
 
     def load(self, path=None):
@@ -32,7 +35,23 @@ class Settings:
             for key, value in json.load(settings_file).items():
                 value = self._normalise_profile(value) if key == "profile" else value
                 setattr(self, key, value)
+        
+        self._normalise_settings()
         return self
+    
+    def _normalise_settings(self):
+        """Normalise settings values.
+        """
+        self.logfile = None if self.logfile is None else os.path.join(self.settings_dir, self.logfile)
+
+        profile_map_length = len(self.profile.map.keys())
+        if self.strip_size != profile_map_length:
+            self.logger.warn(f"Number of the profile map elements ({profile_map_length}) does not match strip_size ({self.strip_size}), it was updated.")
+            self.strip_size = profile_map_length
+
+        if self.threads > self.strip_size:
+            self.threads = self.strip_size
+            self.logger.warn(f"Number of threads is greater than the strip size, not both is {self.threads}")
 
     def _normalise_profile(self, settings_profile_value):
         """Make sure the 'profile' value in the settings is valid.

@@ -1,9 +1,10 @@
 {
-    "port": null,
-    "baud": 56000,
-    "strip_size": 15,
-    "log_level": "CRITICAL",
-    "threads": 15,
+    "port":        null,
+    "baud":        56000,
+    "strip_size":  15,
+    "threads":     15,
     "frame_delay": 10,
-    "profile": "profiles\\bottomthird_2560x1440.json"
+    "profile":     "profiles/bottomthird_2560x1440.json",
+    "logfile":     "../flashy.log",
+    "log_level":   "CRITICAL"
 }
