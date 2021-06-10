@@ -4,6 +4,9 @@ import random
 from ctypes import windll
 import time
 
+# pip install pywin32
+import win32gui, win32ui, win32con
+from PIL import Image
 
 class ScreenReaderAsync(threading.Thread):
     """Class reading RGB values from the screen in a separate thread.
@@ -38,15 +41,65 @@ class ScreenReaderAsync(threading.Thread):
         """Run the loop of reading the pixel values and adding them to the queue.
         """
         self.logger.info("Started screen reader")
+        
+        #win32gui.ReleaseDC(hwnd, hDC)
+        from datetime import datetime
+        led_coord_lists = [(i, self.settings.get_pixel_list(i)) for i in self.index_order]
+        max_x = max(coord[0] for led_pixels in led_coord_lists for coord in led_pixels[1])
+        min_x = min(coord[0] for led_pixels in led_coord_lists for coord in led_pixels[1])
+        max_y = max(coord[1] for led_pixels in led_coord_lists for coord in led_pixels[1])
+        min_y = min(coord[1] for led_pixels in led_coord_lists for coord in led_pixels[1])
+        bbox = (min_x, min_y, max_x+1, max_y+1)
+        print(bbox)
+
+        
+        self.size = (bbox[2]-bbox[0], bbox[3]-bbox[1])
+        self.position = (bbox[0], bbox[1])
+        hwnd = None
+        hDC = win32gui.GetWindowDC(hwnd)
+        self.windowDC = win32ui.CreateDCFromHandle(hDC)
+        self.newDC = self.windowDC.CreateCompatibleDC()
+
+
+        ranges = [1e10, 0.001, 1e10, 0.001]
         while True:
-            time.sleep(self.settings.frame_delay/1000)
+            time.sleep(float(self.settings.frame_delay)/1000)
+            start = datetime.now()
+
+
+
+            self.bitmap = win32ui.CreateBitmap()
+            self.bitmap.CreateCompatibleBitmap(self.windowDC, self.size[0], self.size[1])
+            self.newDC.SelectObject(self.bitmap)
+            self.newDC.BitBlt((0, 0), self.size, self.windowDC, self.position, win32con.SRCCOPY)
+            # bmpinfo = self.bitmap.GetInfo()
+            bmpstr  = self.bitmap.GetBitmapBits(True)
+            self.current_screenshot = Image.frombuffer('RGB', self.size, bmpstr, 'raw', 'BGRX', 0, 1)
+
+
+
+
             for i in self.index_order:
                 item = self._mean_rgb([
-                    self.get_pixel(*coords)
+                    self.current_screenshot.getpixel((coords[0]-bbox[0], coords[1]-bbox[1]))
                     for coords in self.settings.get_pixel_list(i)
                 ])
                 if item is not None:
                     self.queue.put(i, item)
+
+            grabtime = (datetime.now() - start).total_seconds()*1000
+            perpixel = grabtime/self.settings.strip_size
+            if grabtime <= 0.001:
+                grabtime = 1
+            if perpixel <= 0.001:
+                perpixel = 1
+            ranges = [
+                grabtime if (grabtime < ranges[0]) else ranges[0],
+                grabtime if grabtime > ranges[1] else ranges[1],
+                perpixel if perpixel < ranges[2] else ranges[2],
+                perpixel if perpixel > ranges[3] else ranges[3],
+            ]
+            # self.logger.info(f"grabtime: {grabtime}, perpixel: {perpixel}, ranges: {ranges}, fpss: {[1000.0/x if x > 0 else '000' for x in ranges]}")
         
     def get_pixel(self, x, y):
         """Get RGB of a pixel on a screen.
