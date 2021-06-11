@@ -10,6 +10,8 @@ from PIL import Image
 
 class ScreenReaderAsync(threading.Thread):
     """Class reading RGB values from the screen in a separate thread.
+    Using the code from 
+    https://stackoverflow.com/questions/48092655/memory-leak-with-createdcfromhandle-createcompatibledc
 
     Args:
         name (str): name of the thread
@@ -33,117 +35,61 @@ class ScreenReaderAsync(threading.Thread):
         self.index_range = index_range
         self.queue = queue
         self.settings = settings
+        self.logger = logging.getLogger(self.name)
+        self.setup()
+    
+    def setup(self):
+        """Set up variables for the run.
+        """
         self.index_order = list(range(self.index_range[0], self.index_range[1]))
         random.shuffle(self.index_order)
-        self.logger = logging.getLogger(self.name)
+        # get a bbox
+        led_coord_lists = [self.settings.get_pixel_list(i) for i in self.index_order]
+        max_x = max(coord[0] for led_pixels in led_coord_lists for coord in led_pixels)
+        min_x = min(coord[0] for led_pixels in led_coord_lists for coord in led_pixels)
+        max_y = max(coord[1] for led_pixels in led_coord_lists for coord in led_pixels)
+        min_y = min(coord[1] for led_pixels in led_coord_lists for coord in led_pixels)
+        self.bbox = (min_x, min_y, max_x+1, max_y+1)
+        # set up some helpful variables
+        self.size = (self.bbox[2]-self.bbox[0], self.bbox[3]-self.bbox[1])
+        self.position = (self.bbox[0], self.bbox[1])
+        self.hwnd = None
 
     def run(self):
         """Run the loop of reading the pixel values and adding them to the queue.
         """
         self.logger.info("Started screen reader")
-        
-        #win32gui.ReleaseDC(hwnd, hDC)
-        from datetime import datetime
-        led_coord_lists = [(i, self.settings.get_pixel_list(i)) for i in self.index_order]
-        max_x = max(coord[0] for led_pixels in led_coord_lists for coord in led_pixels[1])
-        min_x = min(coord[0] for led_pixels in led_coord_lists for coord in led_pixels[1])
-        max_y = max(coord[1] for led_pixels in led_coord_lists for coord in led_pixels[1])
-        min_y = min(coord[1] for led_pixels in led_coord_lists for coord in led_pixels[1])
-        bbox = (min_x, min_y, max_x+1, max_y+1)
-        print(bbox)
-
-        
-        self.size = (bbox[2]-bbox[0], bbox[3]-bbox[1])
-        self.position = (bbox[0], bbox[1])
-        hwnd = None
-        hDC = win32gui.GetWindowDC(hwnd)
-        self.windowDC = win32ui.CreateDCFromHandle(hDC)
-        self.newDC = self.windowDC.CreateCompatibleDC()
-
-
-        ranges = [1e10, 0.001, 1e10, 0.001]
         while True:
             time.sleep(float(self.settings.frame_delay)/1000)
-            start = datetime.now()
 
+            try:
+                hdc = win32gui.GetWindowDC(self.hwnd)
+                dc = win32ui.CreateDCFromHandle(hdc)
+                memdc = dc.CreateCompatibleDC()
 
+                bitmap = win32ui.CreateBitmap()
+                bitmap.CreateCompatibleBitmap(dc, self.size[0], self.size[1])
+                memdc.SelectObject(bitmap)
+                memdc.BitBlt((0, 0), self.size, dc, self.position, win32con.SRCCOPY)
+                bits = bitmap.GetBitmapBits(True)
 
-            self.bitmap = win32ui.CreateBitmap()
-            self.bitmap.CreateCompatibleBitmap(self.windowDC, self.size[0], self.size[1])
-            self.newDC.SelectObject(self.bitmap)
-            self.newDC.BitBlt((0, 0), self.size, self.windowDC, self.position, win32con.SRCCOPY)
-            # bmpinfo = self.bitmap.GetInfo()
-            bmpstr  = self.bitmap.GetBitmapBits(True)
-            self.current_screenshot = Image.frombuffer('RGB', self.size, bmpstr, 'raw', 'BGRX', 0, 1)
-
-
-
+                current_screenshot = Image.frombuffer('RGB', self.size, bits, 'raw', 'BGRX', 0, 1)
+            except Exception as e:
+                self.logger.error(f"Error getting a screenshot in ScreenReaderAsync.run(): {e}")
+                time.sleep(1)
+                continue
+            finally:
+                win32gui.DeleteObject(bitmap.GetHandle())
+                memdc.DeleteDC()
+                win32gui.ReleaseDC(self.hwnd, hdc)
 
             for i in self.index_order:
                 item = self._mean_rgb([
-                    self.current_screenshot.getpixel((coords[0]-bbox[0], coords[1]-bbox[1]))
+                    current_screenshot.getpixel((coords[0]-self.bbox[0], coords[1]-self.bbox[1]))
                     for coords in self.settings.get_pixel_list(i)
                 ])
                 if item is not None:
                     self.queue.put(i, item)
-
-            grabtime = (datetime.now() - start).total_seconds()*1000
-            perpixel = grabtime/self.settings.strip_size
-            if grabtime <= 0.001:
-                grabtime = 1
-            if perpixel <= 0.001:
-                perpixel = 1
-            ranges = [
-                grabtime if (grabtime < ranges[0]) else ranges[0],
-                grabtime if grabtime > ranges[1] else ranges[1],
-                perpixel if perpixel < ranges[2] else ranges[2],
-                perpixel if perpixel > ranges[3] else ranges[3],
-            ]
-            # self.logger.info(f"grabtime: {grabtime}, perpixel: {perpixel}, ranges: {ranges}, fpss: {[1000.0/x if x > 0 else '000' for x in ranges]}")
-        
-    def get_pixel(self, x, y):
-        """Get RGB of a pixel on a screen.
-
-        Args:
-            coords (list): coordinates of the pixel on a screen (x, y)
-
-        Returns:
-            tuple with 3 values of red, green, and blue, OR None if there is no value to be read at these coordinates.
-        """
-        colorref = windll.gdi32.GetPixel(self.dc, x, y)
-
-        if colorref < 0:
-            self.logger.debug(f"Got pixel value with negative COLORREF, coords=[{x},{y}] COLORREF={colorref}")
-            return None
-        
-        rgb = tuple(int.to_bytes(
-            colorref,
-            length=3,
-            byteorder="little"
-        ))
-
-        self.logger.debug(f"Got pixel value, coords=[{x},{y}] COLORREF={colorref} rgb={rgb}")
-        return rgb
-    
-    def get_area(self, bbox):
-        """Get an average RGB of pixels on the screen.
-
-        Args:
-            bbox (list): coordinates of the upper-left and lower-right corners on a box on a screen
-
-        Returns:
-            tuple with 3 values of red, green, and blue, OR None if there is no value to be read at these coordinates.
-        """
-        pixel_values = [
-            self.get_pixel(x, y)
-            for x in range(bbox[0], bbox[2])
-            for y in range(bbox[1], bbox[3])
-        ]
-
-        mean_value = self._mean_rgb(pixel_values)
-
-        self.logger.debug(f"Got pixel area, bbox=[{bbox}] arr={pixel_values} mean={mean_value}")
-        return mean_value
 
     def _mean_rgb(self, rgb_values):
         """Calculate a mean value of an array of RGB values.
