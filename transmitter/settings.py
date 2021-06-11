@@ -93,7 +93,7 @@ class Settings:
             KeyError: index not in the map
 
         """
-        coords = self.profile.map.get(str(index), None)
+        coords = self.profile.map.get(str(index), [])
         if coords is None:
             raise KeyError(f"Key {index} does not appear in the map")
         return coords["pixels"]
@@ -147,9 +147,9 @@ class Profile:
                 continue
             elif "bbox" in map_value:
 
-                if map_value["bbox"][0] <= map_value["bbox"][2]:
+                if map_value["bbox"][0] >= map_value["bbox"][2]:
                      map_value["bbox"][2] = map_value["bbox"][0] + 1
-                if map_value["bbox"][1] <= map_value["bbox"][3]:
+                if map_value["bbox"][1] >= map_value["bbox"][3]:
                      map_value["bbox"][3] = map_value["bbox"][1] + 1
                 json_data["map"][map_index]["pixels"] = [
                         (x, y)

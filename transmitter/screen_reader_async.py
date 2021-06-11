@@ -50,6 +50,7 @@ class ScreenReaderAsync(threading.Thread):
         max_y = max(coord[1] for led_pixels in led_coord_lists for coord in led_pixels)
         min_y = min(coord[1] for led_pixels in led_coord_lists for coord in led_pixels)
         self.bbox = (min_x, min_y, max_x+1, max_y+1)
+        print(self.bbox)
         # set up some helpful variables
         self.size = (self.bbox[2]-self.bbox[0], self.bbox[3]-self.bbox[1])
         self.position = (self.bbox[0], self.bbox[1])
