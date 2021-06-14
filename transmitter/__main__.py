@@ -19,7 +19,7 @@ if __name__ == "__main__":
         handlers += logging.FileHandler(filename=settings.logfile),
     
     logging.basicConfig(
-        level=logging.INFO,
+        level=settings.log_level,
         format="%(asctime)s - %(levelname)s - %(name)s:%(filename)s:%(lineno)d - %(message)s",
         handlers=handlers
     )

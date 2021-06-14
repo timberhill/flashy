@@ -20,10 +20,15 @@ Some coding exp because this project is in its infancy.
 
 ### Software
 
-- Windows PC
+- Windows
+
     - the motivation is to use it while gaming, so currently it's only for Windows
-- [Arduino IDE](https://www.arduino.cc/en/guide/windows)
-- Python 3+ and `pyserial` package
+
+- [Arduino IDE](https://www.arduino.cc/en/guide/windows) to upload the code to a board
+
+- Python 3+ and some packages:
+
+    - `pip install pyserial pywin32 pyimage`
 
 ### Hardware
 
