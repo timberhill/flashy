@@ -102,7 +102,7 @@ class ScreenReaderAsync(threading.Thread):
             # make sure it waits for at least a millisecond
             # this miraculously saves some CPU usage
             if time_left_in_frame <= 0:
-                time_left_in_frame = 1
+                time_left_in_frame = 1e-3
             # wait until the next frame
             self.logger.debug(f"Frame ended, frame={frame_duration*1000:2f}ms, " +
                               f"capped_at={self.settings.fps_limit}fps/{1.0/self.settings.fps_limit}s, " +
