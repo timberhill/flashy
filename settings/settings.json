@@ -4,7 +4,7 @@
     "strip_size":  15,
     "threads":     1,
     "frame_delay": 10,
-    "profile":     "profiles\\bottomthird_v3_2560x1440.json",
+    "profile":     "profiles\\bottomthird_2560x1440.json",
     "logfile":     "..\\flashy.log",
     "log_level":   "CRITICAL"
 }

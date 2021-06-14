@@ -3,7 +3,7 @@
 #define LED_PIN 6  // pin the LED strip is connected to
 #define LED_NUMBER 15  // number of LEDs in a strip
 #define DIMMING_STEP 1  // dim LEDs by this step when there is no data coming in
-#define MAXIMUM_BRIGHTNESS 100  // 
+#define MAXIMUM_BRIGHTNESS 255  // 
 
 // initialise the LED strip
 // docs: https://adafruit.github.io/Adafruit_NeoPixel/html/class_adafruit___neo_pixel.html
