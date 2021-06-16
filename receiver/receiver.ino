@@ -28,10 +28,14 @@ void setup() {
 }
 
 void loop() {
-    while (Serial.available() > 0) {
-        if (Serial.read() != '>') continue;  // wait for the starting character
+    if (Serial.available()) {
+        // if the serial data is coming in, reset the variables used to shut down
         unavailable_count = 0;
         offSwitch = false;
+    }
+    while (Serial.available() > 0) {
+        // keep reading serial data while the data is coming in
+        if (Serial.read() != '>') continue;  // wait for the starting character
 
         // starting character encountered, read the next 12 characters
         led_index = readSerialThreeDigitNumber();
@@ -43,10 +47,10 @@ void loop() {
         updateLEDValue(led_index, led_red, led_green, led_blue);
     }
 
-    // logic to turn off LEDs if no serial data is coming in
+    // logic to turn off LEDs if no serial data is coming in for a while
     unavailable_count++;
-    delay(100);
-    if (unavailable_count > 5 && !offSwitch) {
+    delay(10);  // wait a little bit, but not so long that it would impact the framerate
+    if (unavailable_count > 10 && !offSwitch) {
         shutdownSequence();
         offSwitch = true;
     }
@@ -72,23 +76,38 @@ void updateLEDValue(byte i, byte r, byte g, byte b) {
 
 void shutdownSequence() {
     // old timey tv shutdown animation
-    int middle_pixel = LED_NUMBER / 2;
-    byte colorbyte = 0;
-    int wait = 200 / LED_NUMBER;
+    int middle_pixel = LED_NUMBER / 2;  // define the middle pixel
+    int wait = 100 / LED_NUMBER;  // defines animation speed, independent of the length of the strip
+    byte middle_pixel_brightness = 0;
+
+    // turn off the pixels starting from the edges of the strip
+    // at the same time, brighten the middle pixel
     for (int i = 0; i < middle_pixel; i++) {
-      if (Serial.available() > 0) return;
+        if (Serial.available() > 0) return;  // stop the animation if there is serial data coming in
+
         strip.setPixelColor(i, strip.Color(0, 0, 0));
         strip.setPixelColor(LED_NUMBER-i-1, strip.Color(0, 0, 0));
-        colorbyte = map(i, 0, middle_pixel-1, 0, 255);
-        strip.setPixelColor(middle_pixel, strip.Color(colorbyte, colorbyte, colorbyte));
+
+        middle_pixel_brightness = map(i, 0, middle_pixel-1, 0, 255);
+        strip.setPixelColor(middle_pixel, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
+
         strip.show();
+
+        // wait for the animation frame
+        // the map() is so that the animation accelerates
         delay(map(i, 0, middle_pixel-1, wait*5, wait/5));
     }
+
+    // fade out the middle pixel
     for (int i = 0; i < LED_NUMBER*3; i++) {
-      if (Serial.available() > 0) return;
-        colorbyte = map(i, 0, LED_NUMBER*3-1, 255, 0);
-        strip.setPixelColor(middle_pixel, strip.Color(colorbyte, colorbyte, colorbyte));
+        if (Serial.available() > 0) return;  // stop the animation if there is serial data coming in
+
+        middle_pixel_brightness = map(i, 0, LED_NUMBER*3-1, 255, 0);
+        strip.setPixelColor(middle_pixel, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
+
         strip.show();
+
+        // wait for the animation frame
         delay(wait);
     }
 }
