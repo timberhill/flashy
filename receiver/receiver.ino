@@ -25,7 +25,7 @@ void setup()
     strip.setBrightness(led_brightness);
     strip.show();
     // initialise serial communication
-    Serial.begin(56000);
+    Serial.begin(9600);
 }
 
 void loop()
