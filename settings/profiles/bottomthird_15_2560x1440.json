@@ -1,5 +1,5 @@
 {
-    "description": "Row of pixels at the bottom of the screen, covering middle third of the length",
+    "description": "Row of 15 pixels at the bottom of the screen, covering middle third of the length",
     
     "map": {
         "0":  { "bbox" : [720,  1350, 720,  1420] },
