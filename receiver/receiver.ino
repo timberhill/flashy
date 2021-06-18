@@ -1,12 +1,14 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LED_PIN 6              // pin the LED strip is connected to
-#define LED_NUMBER 15          // number of LEDs in a strip
+#define LED_PIN 12              // pin the LED strip is connected to
+#define LED_NUMBER 86          // number of LEDs in a strip
 #define MAXIMUM_BRIGHTNESS 255 //
 
 // initialise the LED strip
 // docs: https://adafruit.github.io/Adafruit_NeoPixel/html/class_adafruit___neo_pixel.html
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUMBER, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel onboard_pixel = Adafruit_NeoPixel(1, 8, NEO_GRB + NEO_KHZ800);
+
 byte led_index = 0;
 byte led_red = 0;
 byte led_green = 0;
@@ -14,6 +16,7 @@ byte led_blue = 0;
 byte led_brightness = MAXIMUM_BRIGHTNESS;
 int unavailable_count = 0;
 bool offSwitch = false;
+int index = 0;
 
 //////////////////////////////////
 ///////       MAIN        ////////
@@ -24,8 +27,12 @@ void setup()
     strip.begin();
     strip.setBrightness(led_brightness);
     strip.show();
+    // initialise the onboard neopixel
+    onboard_pixel.begin();
+    onboard_pixel.setBrightness(led_brightness);
+    onboard_pixel.show();
     // initialise serial communication
-    Serial.begin(9600);
+    Serial.begin(56000);
 }
 
 void loop()
@@ -50,12 +57,19 @@ void loop()
 
         // update an LED value accordingly
         updateLEDValue(led_index, led_red, led_green, led_blue);
+        if (index >= LED_NUMBER-1) {
+          strip.show();
+          onboard_pixel.show();
+          index = 0;
+        } else {
+          index++;
+        }
     }
 
     // logic to turn off LEDs if no serial data is coming in for a while
     unavailable_count++;
-    delay(10); // wait a little bit, but not so long that it would impact the framerate
-    if (unavailable_count > 10 && !offSwitch)
+    delay(1); // wait a little bit, but not so long that it would impact the framerate
+    if (unavailable_count > 500 && !offSwitch)
     {
         shutdownSequence();
         offSwitch = true;
@@ -76,7 +90,9 @@ void updateLEDValue(byte i, byte r, byte g, byte b)
 {
     // set the value of an LED and refresh the strip
     strip.setPixelColor(i, strip.Color(r, g, b));
-    strip.show();
+    if (i == LED_NUMBER/2) {
+      onboard_pixel.setPixelColor(0, onboard_pixel.Color(r, g, b));
+    }
 }
 
 void shutdownSequence()
@@ -114,7 +130,8 @@ void shutdownSequence()
 
         middle_pixel_brightness = map(i, 0, LED_NUMBER * 3 - 1, 255, 0);
         strip.setPixelColor(middle_pixel, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
-
+        onboard_pixel.setPixelColor(0, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
+        onboard_pixel.show();
         strip.show();
 
         // wait for the animation frame
