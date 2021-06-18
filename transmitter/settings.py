@@ -19,6 +19,7 @@ class Settings:
         self.settings_path = path
         self.settings_dir = os.path.dirname(self.settings_path)
         self.logger = logging.getLogger("Settings")
+        self.logger.info(f"Reading settings from {path}")
         self.load(path)
 
     def load(self, path=None):
@@ -31,7 +32,6 @@ class Settings:
             settings (Settings): this object with the attributed loaded
         """
         path = self.settings_path if path is None else path
-        self.logger.info(f"Reading settings from {path}")
         with open(path, "r") as settings_file:
             # set all the settings as class attributes
             for key, value in json.load(settings_file).items():

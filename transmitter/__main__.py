@@ -10,9 +10,10 @@ from . import Settings, FlashyApp
 
 
 if __name__ == "__main__":
+    settings_path = "settings/settings.json"
 
     # read the settings file
-    settings = Settings("settings/settings.json")
+    settings = Settings(settings_path)
 
     handlers = [logging.StreamHandler(sys.stdout),]
     if settings.logfile is not None:
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     )
     logger = logging.getLogger("App")
 
-    logger.info("Starting with settings below:")
+    logger.info(f"Starting with settings from {settings_path}")
 
     if settings.port is None:
         settings.port = serial.tools.list_ports.comports()[0].device

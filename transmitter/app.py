@@ -51,9 +51,7 @@ class FlashyApp:
             baud=self.settings.baud
         )
         self.transmitter.daemon = True
-
-        # keep the main thread alive while the daemons are working
-        self.logger.info("All threads are set up")
+        self.logger.debug(f"The threads are set up: transmitters=1, screenreaders={len(self.readers)}")
     
     def start(self):
         """Start the daemon threads and wait in the main thread indefinitely.
@@ -63,7 +61,7 @@ class FlashyApp:
             reader.daemon = True
             reader.start()
         
-        self.logger.info("All threads are running!")
+        self.logger.info("The app is running")
 
         # wait indefinitely
         while True:

@@ -36,7 +36,7 @@ class SerialTransmitterAsync(threading.Thread):
     def run(self):
         """Run the loop of getting values form the queue and sending them to the serial port.
         """
-        self.logger.info("Started serial transmitter")
+        self.logger.debug("Started serial transmitter")
         while True:
             time.sleep(self.frame_delay/1000)
             for i in self.index_order:

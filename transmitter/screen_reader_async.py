@@ -56,7 +56,7 @@ class ScreenReaderAsync(threading.Thread):
     def run(self):
         """Run the loop of reading the pixel values and adding them to the queue.
         """
-        self.logger.info("Started screen reader")
+        self.logger.debug("Started screen reader")
 
         while True:
             # start a frame
