@@ -1,8 +1,8 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LED_PIN 12              // pin the LED strip is connected to
+#define LED_PIN 12             // pin the LED strip is connected to
 #define LED_NUMBER 86          // number of LEDs in a strip
-#define MAXIMUM_BRIGHTNESS 255 //
+#define MAXIMUM_BRIGHTNESS 150 // strip brightness, 0..255
 
 // initialise the LED strip
 // docs: https://adafruit.github.io/Adafruit_NeoPixel/html/class_adafruit___neo_pixel.html
@@ -42,12 +42,9 @@ void loop()
         // if the serial data is coming in, reset the variables used to shut down
         unavailable_count = 0;
         offSwitch = false;
-    }
-    while (Serial.available() > 0)
-    {
         // keep reading serial data while the data is coming in
         if (Serial.read() != '>')
-            continue; // wait for the starting character
+            return; // wait for the starting character
 
         // starting character encountered, read the next 12 characters
         led_index = readSerialThreeDigitNumber();
@@ -64,15 +61,14 @@ void loop()
         } else {
           index++;
         }
-    }
-
-    // logic to turn off LEDs if no serial data is coming in for a while
-    unavailable_count++;
-    delay(1); // wait a little bit, but not so long that it would impact the framerate
-    if (unavailable_count > 500 && !offSwitch)
-    {
-        shutdownSequence();
-        offSwitch = true;
+    } else {
+        // logic to turn off LEDs if no serial data is coming in for a while
+        unavailable_count++;
+        if (unavailable_count > 20000 && !offSwitch)
+        {
+            shutdownSequence();
+            offSwitch = true;
+        }
     }
 }
 //////////////////////////////////
