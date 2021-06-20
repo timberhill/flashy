@@ -45,7 +45,7 @@ Non-addressable LEDs are on the [todo list](TODO.md).
 ## Setup
 
 I used this setup (different board, of course):
-![board setup](https://www.eerkmans.nl/wp-content/uploads/2016/02/arduino_2.png =433x280)
+![board setup](https://www.eerkmans.nl/wp-content/uploads/2016/02/arduino_2.png)
 
 There are lots of tutorials on programming the boards that can help, like 
 [this](https://learn.adafruit.com/getting-started-with-flora/blink-onboard-neopixel), 
