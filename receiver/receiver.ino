@@ -1,8 +1,10 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LED_PIN 12              // pin the LED strip is connected to
-#define LED_NUMBER 86          // number of LEDs in a strip
-#define MAXIMUM_BRIGHTNESS 255 //
+#define LED_PIN 12                // pin the LED strip is connected to
+#define LED_NUMBER 86             // number of LEDs in a strip
+#define MAXIMUM_BRIGHTNESS 255    // maximum brightness of all LEDs
+#define BAUDRATE 9600             // baud rate for serial communication
+#define TIMEOUT_ITERATIONS 50000  // play the shutdown animation after this many iterations without any serial data
 
 // initialise the LED strip
 // docs: https://adafruit.github.io/Adafruit_NeoPixel/html/class_adafruit___neo_pixel.html
@@ -27,12 +29,14 @@ void setup()
     strip.begin();
     strip.setBrightness(led_brightness);
     strip.show();
+
     // initialise the onboard neopixel
     onboard_pixel.begin();
     onboard_pixel.setBrightness(led_brightness);
     onboard_pixel.show();
+
     // initialise serial communication
-    Serial.begin(9600);
+    Serial.begin(BAUDRATE);
 }
 
 void loop()
@@ -64,26 +68,14 @@ void loop()
         } else {
           index++;
         }
-<<<<<<< Updated upstream
-    }
-
-    // logic to turn off LEDs if no serial data is coming in for a while
-    unavailable_count++;
-    delay(1); // wait a little bit, but not so long that it would impact the framerate
-    if (unavailable_count > 500 && !offSwitch)
-    {
-        shutdownSequence();
-        offSwitch = true;
-=======
     } else {
         // logic to turn off LEDs if no serial data is coming in for a while
         unavailable_count++;
-        if (unavailable_count > 50000 && !offSwitch)
+        if (unavailable_count > TIMEOUT_ITERATIONS && !offSwitch)
         {
             shutdownSequence();
             offSwitch = true;
         }
->>>>>>> Stashed changes
     }
 }
 //////////////////////////////////
