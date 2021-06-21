@@ -46,12 +46,9 @@ void loop()
         // if the serial data is coming in, reset the variables used to shut down
         unavailable_count = 0;
         offSwitch = false;
-    }
-    while (Serial.available() > 0)
-    {
         // keep reading serial data while the data is coming in
         if (Serial.read() != '>')
-            continue; // wait for the starting character
+            return; // wait for the starting character
 
         // starting character encountered, read the next 12 characters
         led_index = readSerialThreeDigitNumber();
