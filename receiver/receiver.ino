@@ -32,7 +32,7 @@ void setup()
     onboard_pixel.setBrightness(led_brightness);
     onboard_pixel.show();
     // initialise serial communication
-    Serial.begin(56000);
+    Serial.begin(9600);
 }
 
 void loop()
@@ -64,6 +64,7 @@ void loop()
         } else {
           index++;
         }
+<<<<<<< Updated upstream
     }
 
     // logic to turn off LEDs if no serial data is coming in for a while
@@ -73,6 +74,16 @@ void loop()
     {
         shutdownSequence();
         offSwitch = true;
+=======
+    } else {
+        // logic to turn off LEDs if no serial data is coming in for a while
+        unavailable_count++;
+        if (unavailable_count > 50000 && !offSwitch)
+        {
+            shutdownSequence();
+            offSwitch = true;
+        }
+>>>>>>> Stashed changes
     }
 }
 //////////////////////////////////

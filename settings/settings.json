@@ -1,6 +1,6 @@
 {
     "port":        null,
-    "baud":        56000,
+    "baud":        9600,
     "strip_size":  86,
     "threads":     1,
     "fps_limit":   60,
