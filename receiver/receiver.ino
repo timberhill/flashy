@@ -2,22 +2,22 @@
 
 #define LED_PIN 12                // pin the LED strip is connected to
 #define LED_NUMBER 86             // number of LEDs in a strip
-#define MAXIMUM_BRIGHTNESS 255    // maximum brightness of all LEDs
+#define MAXIMUM_BRIGHTNESS 127    // maximum brightness of all LEDs
 #define BAUDRATE 9600             // baud rate for serial communication
-#define TIMEOUT_ITERATIONS 50000  // play the shutdown animation after this many iterations without any serial data
+#define TIMEOUT_ITERATIONS 10000  // play the shutdown animation after this many iterations without any serial data
 
 // initialise the LED strip
 // docs: https://adafruit.github.io/Adafruit_NeoPixel/html/class_adafruit___neo_pixel.html
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUMBER, LED_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel onboard_pixel = Adafruit_NeoPixel(1, 8, NEO_GRB + NEO_KHZ800);
 
+// temp values
 byte led_index = 0;
 byte led_red = 0;
 byte led_green = 0;
 byte led_blue = 0;
-byte led_brightness = MAXIMUM_BRIGHTNESS;
 int unavailable_count = 0;
-bool offSwitch = false;
+bool onOffSwitch = true;  // false if the strip should be off
 int index = 0;
 
 //////////////////////////////////
@@ -27,12 +27,12 @@ void setup()
 {
     // initialise the LED strip
     strip.begin();
-    strip.setBrightness(led_brightness);
+    strip.setBrightness(MAXIMUM_BRIGHTNESS);
     strip.show();
 
     // initialise the onboard neopixel
     onboard_pixel.begin();
-    onboard_pixel.setBrightness(led_brightness);
+    onboard_pixel.setBrightness(MAXIMUM_BRIGHTNESS);
     onboard_pixel.show();
 
     // initialise serial communication
@@ -42,10 +42,11 @@ void setup()
 void loop()
 {
     if (Serial.available())
-    {
+    { 
         // if the serial data is coming in, reset the variables used to shut down
         unavailable_count = 0;
-        offSwitch = false;
+        onOffSwitch = true;
+  
         // keep reading serial data while the data is coming in
         if (Serial.read() != '>')
             return; // wait for the starting character
@@ -58,7 +59,7 @@ void loop()
 
         // update an LED value accordingly
         updateLEDValue(led_index, led_red, led_green, led_blue);
-        if (index >= LED_NUMBER-1) {
+        if (index >= LED_NUMBER*0.41) {
           strip.show();
           onboard_pixel.show();
           index = 0;
@@ -67,11 +68,12 @@ void loop()
         }
     } else {
         // logic to turn off LEDs if no serial data is coming in for a while
-        unavailable_count++;
-        if (unavailable_count > TIMEOUT_ITERATIONS && !offSwitch)
+        if (unavailable_count > TIMEOUT_ITERATIONS && onOffSwitch)
         {
             shutdownSequence();
-            offSwitch = true;
+            onOffSwitch = false;
+        } else {
+            unavailable_count++;
         }
     }
 }
@@ -91,7 +93,7 @@ void updateLEDValue(byte i, byte r, byte g, byte b)
     // set the value of an LED and refresh the strip
     strip.setPixelColor(i, strip.Color(r, g, b));
     if (i == LED_NUMBER/2) {
-      onboard_pixel.setPixelColor(0, onboard_pixel.Color(r, g, b));
+        onboard_pixel.setPixelColor(0, onboard_pixel.Color(r, g, b));
     }
 }
 
