@@ -16,33 +16,39 @@ class QueueArray:
         self.length = length
         self.queues = [Queue(size) for i in range(self.length)]
     
-    def full(self, index):
+    def full(self, index=None):
         """Is the queue full.
 
         Args:
-            index (int): index of the queue in array
+            index (int): index of the queue in array, if not set, returns true if all queues are full
 
         Returns:
             bool: True if the queue is full, False otherwise
         """
+        if index is None:
+            return all(queue_i.full() for queue_i in self.queues)
+
         return self.queues[index].full()
     
     def empty(self, index):
         """Is the queue empty.
 
         Args:
-            index (int): index of the queue in array
+            index (int): index of the queue in array, if not set, returns true if all queues are empty
 
         Returns:
             bool: True if the queue is empty, False otherwise
         """
+        if index is None:
+            return all(queue_i.empty() for queue_i in self.queues)
+
         return self.queues[index].empty()
     
     def qsize(self, index=None):
         """Size of the queue.
 
         Args:
-            index (int): index of the queue in array (optional)
+            index (int): index of the queue in array, if not set, returns a list of all queue sizes
 
         Returns:
             int/list: size of the queue at the index or a list of sizes of all queues

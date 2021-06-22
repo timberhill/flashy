@@ -53,39 +53,50 @@ class ScreenReaderAsync(threading.Thread):
         # set up some helpful variables
         self.hwnd = None
 
+    def _process_frame(self):
+        with BitBltScreenshot(bbox=self._bbox) as screenshot:
+            # add the pixel values to a queue
+            for i in self.index_order:
+                item = self._mean_rgb([
+                    screenshot.getpixel((coords[0]-self._bbox[0], coords[1]-self._bbox[1]))
+                    for coords in self.settings.get_pixel_list(i)
+                ])
+                if item is not None:
+                    self.queue.put(i, item)
+
+
     def run(self):
         """Run the loop of reading the pixel values and adding them to the queue.
         """
         self.logger.debug("Started screen reader")
 
         while True:
+            if self.queue.full():
+                # if the queue is full, wait this one out
+                time.sleep(1.0/self.settings.fps_limit)
+                continue
+                
             # start a frame
             frame_start = datetime.utcnow()
 
-            with BitBltScreenshot(bbox=self._bbox) as screenshot:
-                # add the pixel values to a queue
-                for i in self.index_order:
-                    item = self._mean_rgb([
-                        screenshot.getpixel((coords[0]-self._bbox[0], coords[1]-self._bbox[1]))
-                        for coords in self.settings.get_pixel_list(i)
-                    ])
-                    if item is not None:
-                        self.queue.put(i, item)
-            
+            # get the screenshot and add it to the queue
+            self._process_frame()
+        
             # how long was this frame in milliseconds
             frame_duration = (datetime.utcnow() - frame_start).total_seconds()
-            if frame_duration < 1e-5: frame_duration
             time_left_in_frame = self._frame_min_duration - frame_duration
+
             # make sure it waits for at least a millisecond
-            # this miraculously saves some CPU usage
+            # (this miraculously saves some CPU usage)
             if time_left_in_frame <= 0:
                 time_left_in_frame = 1e-3
+
             # wait until the next frame
-            self.logger.debug(f"Frame ended, frame={frame_duration*1000:2f}ms, " +
-                              f"capped_at={self.settings.fps_limit}fps/{1.0/self.settings.fps_limit}s, " +
+            self.logger.debug(f"Frame ended, frame={frame_duration*1000:1f}ms, " +
+                              f"capped_at={self.settings.fps_limit}fps/{1000/self.settings.fps_limit:1f}ms, " +
                               f"wait={time_left_in_frame}")
             time.sleep(time_left_in_frame)
-
+            
     def _mean_rgb(self, rgb_values):
         """Calculate a mean value of an array of RGB values.
 
