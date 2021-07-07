@@ -52,10 +52,11 @@ There are lots of tutorials on programming the boards that can help, like
 [this](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels) 
 and/or [this](https://www.eerkmans.nl/powering-lots-of-leds-from-arduino/).
 
-1. Create or use a profile in `settings/profiles/` and reference it in the settings
+1. Create a settings file similar to `settings/settings_example.json`, named `settings/settings.json`
+2. Create or use a profile in `settings/profiles/` and reference it in the settings
     - you can also put the profile json into the settings file directly
-2. Connect the board with the LEDs to the PC
-3. Connect the board and upload the receiver code
+3. Connect the board with the LEDs to the PC
+4. Connect the board and upload the receiver code
     - make sure that the variables like the length of the LED strip and pin number are set correctly for your setup
 
 ## Usage

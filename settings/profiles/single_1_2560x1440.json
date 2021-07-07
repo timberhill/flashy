@@ -1,0 +1,7 @@
+{
+    "description": "Single LED at the bottom middle of the screen",
+    
+    "map": {
+        "0":  { "bbox" : [1220, 1350, 1220, 1420] }
+    }
+}
