@@ -23,15 +23,15 @@ Some coding exp because this is DIY af.
 
 ### Software
 
-- Windows
-
-    - the motivation is to use it while gaming, so currently it's only for Windows
+- Windows / MacOS
 
 - [Arduino IDE](https://www.arduino.cc/en/guide/windows) to upload the code to a board
 
 - Python 3+ and some packages:
 
-    - `pip install pyserial pywin32 pyimage`
+    - Windows:`pip install pyserial pywin32 pyimage`
+
+    - MacOS:`pip install pyserial pyobjc-framework-Quartz`
 
 ### Hardware
 
@@ -39,8 +39,7 @@ I use Adafruit Flora as it is the one I had lying around.
 It can be any Arduino board that supports serial communication though - might just need to update the receiver code.
 
 In addition, of course, you need a strip of LEDs connected.
-Currently the onboard script only supports addressable LEDs and erquired only one pin on the board.
-Non-addressable LEDs are on the [todo list](TODO.md).
+Currently the onboard script only supports addressable LEDs and requires only one pin on the board.
 
 ## Setup
 

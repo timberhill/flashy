@@ -13,8 +13,8 @@ class BitBltScreenshot:
         self.logger = logging.getLogger("BitBltScreenshot")
         self._grab()  # get the screenshot
     
-    def getpixel(self, *args, **kwargs):
-        return self.screenshot.getpixel(*args, **kwargs)
+    def getpixel(self, x, y):
+        return self.screenshot.getpixel((x, y))
     
     def _grab(self):
         start = datetime.utcnow()

@@ -3,8 +3,14 @@ import logging
 import random
 import time
 from datetime import datetime
+from sys import platform
 
-from .bitblt_screenshot import BitBltScreenshot
+if platform == "darwin":
+    from .cg_screenshot import CGScreenshot as Screenshot
+elif platform == "win32":
+    from .bitblt_screenshot import BitBltScreenshot as Screenshot
+elif platform == "linux" or platform == "linux2":
+    raise NotImplementedError("Looks like you're trying to run this in linux, but flashy only works on windows and macos for now.")
 
 
 class ScreenReaderAsync(threading.Thread):
@@ -54,11 +60,11 @@ class ScreenReaderAsync(threading.Thread):
         self.hwnd = None
 
     def _process_frame(self):
-        with BitBltScreenshot(bbox=self._bbox) as screenshot:
+        with Screenshot(bbox=self._bbox) as screenshot:
             # add the pixel values to a queue
             for i in self.index_order:
                 item = self._mean_rgb([
-                    screenshot.getpixel((coords[0]-self._bbox[0], coords[1]-self._bbox[1]))
+                    screenshot.getpixel(coords[0]-self._bbox[0], coords[1]-self._bbox[1])
                     for coords in self.settings.get_pixel_list(i)
                 ])
                 if item is not None:
@@ -92,9 +98,9 @@ class ScreenReaderAsync(threading.Thread):
                 time_left_in_frame = 1e-3
 
             # wait until the next frame
-            self.logger.debug(f"Frame ended, frame={frame_duration*1000:1f}ms, " +
+            self.logger.debug(f"Frame ended, duration={frame_duration*1000:1f}ms, " +
                               f"capped_at={self.settings.fps_limit}fps/{1000/self.settings.fps_limit:1f}ms, " +
-                              f"wait={time_left_in_frame}")
+                              f"wait={time_left_in_frame*1000:.1f}ms")
             time.sleep(time_left_in_frame)
             
     def _mean_rgb(self, rgb_values):

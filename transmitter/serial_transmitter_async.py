@@ -54,6 +54,5 @@ class SerialTransmitterAsync(threading.Thread):
             formatted string that was sent to the serial
         """
         string_data = ">" + "".join([str(x).zfill(3) for x in value])
-        self.logger.debug(f"Sending data to {self.serial.port}: '{string_data}'")
         self.serial.write(bytes(string_data, "utf-8"))
         return string_data
