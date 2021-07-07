@@ -29,9 +29,9 @@ Some coding exp because this is DIY af.
 
 - Python 3+ and some packages:
 
-    - Windows:`pip install pyserial pywin32 pyimage`
+    - Windows: `pip install pyserial pywin32 pyimage`
 
-    - MacOS:`pip install pyserial pyobjc-framework-Quartz`
+    - MacOS: `pip install pyserial pyobjc-framework-Quartz`
 
 ### Hardware
 
@@ -44,6 +44,7 @@ Currently the onboard script only supports addressable LEDs and requires only on
 ## Setup
 
 I used this setup (different board, of course):
+
 ![board setup](https://www.eerkmans.nl/wp-content/uploads/2016/02/arduino_2.png)
 
 There are lots of tutorials on programming the boards that can help, like 
