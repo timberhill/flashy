@@ -49,27 +49,19 @@ class ScreenReaderAsync(threading.Thread):
         random.shuffle(self.index_order)
 
         # get a bbox
-        led_coord_lists = [self.settings.get_pixel_list(i) for i in self.index_order]
-        max_x = max(coord[0] for led_pixels in led_coord_lists for coord in led_pixels)
-        min_x = min(coord[0] for led_pixels in led_coord_lists for coord in led_pixels)
-        max_y = max(coord[1] for led_pixels in led_coord_lists for coord in led_pixels)
-        min_y = min(coord[1] for led_pixels in led_coord_lists for coord in led_pixels)
-        self._bbox = (min_x, min_y, max_x+1, max_y+1)
+        pixel_lists = [self.settings.get_pixel_list(i) for i in self.index_order]
+        self._bbox = (
+            min(pixel[0] for pixel_list in pixel_lists for pixel in pixel_list),
+            min(pixel[1] for pixel_list in pixel_lists for pixel in pixel_list),
+            1 + max(pixel[0] for pixel_list in pixel_lists for pixel in pixel_list),
+            1 + max(pixel[1] for pixel_list in pixel_lists for pixel in pixel_list)
+        )
 
-        # set up some helpful variables
-        self.hwnd = None
-
-    def _process_frame(self):
-        with Screenshot(bbox=self._bbox) as screenshot:
-            # add the pixel values to a queue
-            for i in self.index_order:
-                item = self._mean_rgb([
-                    screenshot.getpixel(coords[0]-self._bbox[0], coords[1]-self._bbox[1])
-                    for coords in self.settings.get_pixel_list(i)
-                ])
-                if item is not None:
-                    self.queue.put(i, item)
-
+        # this is a hack to reduce flickering in macos caused by dragging windows
+        # the code will skip pure black frames up to a *limit* in a row
+        if platform == "darwin":
+            self._black_pixel_counts = [0] * len(self.index_order)
+            self._black_pixel_limit = 5
 
     def run(self):
         """Run the loop of reading the pixel values and adding them to the queue.
@@ -81,13 +73,13 @@ class ScreenReaderAsync(threading.Thread):
                 # if the queue is full, wait this one out
                 time.sleep(1.0/self.settings.fps_limit)
                 continue
-                
+
             # start a frame
             frame_start = datetime.utcnow()
 
             # get the screenshot and add it to the queue
             self._process_frame()
-        
+
             # how long was this frame in milliseconds
             frame_duration = (datetime.utcnow() - frame_start).total_seconds()
             time_left_in_frame = self._frame_min_duration - frame_duration
@@ -102,7 +94,30 @@ class ScreenReaderAsync(threading.Thread):
                               f"capped_at={self.settings.fps_limit}fps/{1000/self.settings.fps_limit:1f}ms, " +
                               f"wait={time_left_in_frame*1000:.1f}ms")
             time.sleep(time_left_in_frame)
-            
+
+    def _process_frame(self):
+        with Screenshot(bbox=self._bbox) as screenshot:
+            # add the pixel values to a queue
+            if max(self._black_pixel_counts) > 0:
+                print(max(self._black_pixel_counts))
+            for i in self.index_order:
+                item = self._mean_rgb([
+                    screenshot.getpixel(
+                        x=coords[0]-self._bbox[0],
+                        y=coords[1]-self._bbox[1]
+                    ) for coords in self.settings.get_pixel_list(i)
+                ])
+
+                if platform == "darwin":
+                    if item == (0, 0, 0) and self._black_pixel_counts[i] <= self._black_pixel_limit:
+                        item = None  # skip this frame for this pixel, might a flicker
+                        self._black_pixel_counts[i] += 1
+                    elif item != (0, 0, 0):
+                        self._black_pixel_counts[i] = 0
+
+                if item is not None:
+                    self.queue.put(i, item)
+
     def _mean_rgb(self, rgb_values):
         """Calculate a mean value of an array of RGB values.
 
