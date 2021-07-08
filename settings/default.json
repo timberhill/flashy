@@ -1,0 +1,10 @@
+{
+    "port":        null,
+    "baud":        9600,
+    "strip_size":  1,
+    "threads":     1,
+    "fps_limit":   30,
+    "profile":     "profiles/single_1_2560x1440.json",
+    "logfile":     null,
+    "log_level":   "INFO"
+}

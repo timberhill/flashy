@@ -1,7 +1,7 @@
 {
-    "port":        null,
+    "port":        "/dev/cu.usbmodem141401",
     "baud":        9600,
-    "strip_size":  1,
+    "strip_size":  86,
     "threads":     1,
     "fps_limit":   30,
     "profile":     "profiles/bottomrow_86_2560x1440.json",

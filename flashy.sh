@@ -2,4 +2,4 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd $SCRIPT_DIR
-python -m transmitter
+python -m transmitter $1

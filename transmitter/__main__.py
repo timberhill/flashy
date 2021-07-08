@@ -3,6 +3,7 @@ Entry point of flashy
 """
 
 import logging
+import os
 import sys
 import serial.tools.list_ports
 import time
@@ -11,7 +12,9 @@ from . import Settings, FlashyApp
 
 
 if __name__ == "__main__":
-    settings_path = "settings/settings.json"
+    settings_path = f"settings/{sys.argv[1]}.json" \
+        if len(sys.argv) > 1 \
+        else "settings/default.json"
 
     # read the settings file
     settings = Settings(settings_path)
