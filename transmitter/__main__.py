@@ -25,7 +25,7 @@ if __name__ == "__main__":
     
     logging.basicConfig(
         level=settings.log_level,
-        format="%(asctime)s - %(name)s:%(filename)s:%(lineno)d - %(levelname)s: %(message)s",
+        format="%(asctime)s %(levelname)s: %(message)s",
         handlers=handlers
     )
     logger = logging.getLogger("App")

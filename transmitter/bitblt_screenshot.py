@@ -5,6 +5,10 @@ from PIL import Image
 
 
 class BitBltScreenshot:
+    """
+    Using the code from 
+    https://stackoverflow.com/questions/48092655/memory-leak-with-createdcfromhandle-createcompatibledc
+    """
     def __init__(self, bbox, hwnd=None):
         self.bbox = bbox
         self.hwnd = hwnd
@@ -12,10 +16,10 @@ class BitBltScreenshot:
         self.position = (self.bbox[0], self.bbox[1])
         self.logger = logging.getLogger("BitBltScreenshot")
         self._grab()  # get the screenshot
-    
+
     def getpixel(self, x, y):
         return self.screenshot.getpixel((x, y))
-    
+
     def _grab(self):
         start = datetime.utcnow()
         self.hdc = win32gui.GetWindowDC(self.hwnd)
@@ -29,10 +33,10 @@ class BitBltScreenshot:
         self.screenshot = Image.frombuffer('RGB', self.size, self.bits, 'raw', 'BGRX', 0, 1)
         grabtime_ms = (datetime.utcnow() - start).total_seconds() * 1000
         self.logger.debug(f"grabbed a screenshot, duration={grabtime_ms}ms")
-        
+
     def __enter__(self):
         return self
-        
+
     def __exit__(self, exc_type, exc_value, exc_traceback):
         win32gui.DeleteObject(self.bitmap.GetHandle())
         self.memdc.DeleteDC()

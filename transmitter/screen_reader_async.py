@@ -15,8 +15,6 @@ elif platform == "linux" or platform == "linux2":
 
 class ScreenReaderAsync(threading.Thread):
     """Class reading RGB values from the screen in a separate thread.
-    Using the code from 
-    https://stackoverflow.com/questions/48092655/memory-leak-with-createdcfromhandle-createcompatibledc
 
     Args:
         settings (settings.Settings): flashy settings object
@@ -40,7 +38,7 @@ class ScreenReaderAsync(threading.Thread):
         self.settings = settings
         self.logger = logging.getLogger(self.name)
         self.setup()
-    
+
     def setup(self):
         """Set up variables for the run.
         """
@@ -98,8 +96,6 @@ class ScreenReaderAsync(threading.Thread):
     def _process_frame(self):
         with Screenshot(bbox=self._bbox) as screenshot:
             # add the pixel values to a queue
-            if max(self._black_pixel_counts) > 0:
-                print(max(self._black_pixel_counts))
             for i in self.index_order:
                 item = self._mean_rgb([
                     screenshot.getpixel(

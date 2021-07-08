@@ -26,12 +26,18 @@ class SerialTransmitterAsync(threading.Thread):
     def __init__(self, name=None, queue=None, port=None, baud=9600, frame_delay=1):
         super(SerialTransmitterAsync,self).__init__()
         self.name = name
-        self.serial = Serial(port, baud)
         self.queue = queue
+        self.port = port
+        self.baud = baud
         self.frame_delay = frame_delay
+        self.serial = None
         self.index_order = list(range(self.queue.length))
+        self.error_logged = False  # to not flood the console with errors if disconnected
         random.shuffle(self.index_order)
         self.logger = logging.getLogger(self.name)
+
+    def _connect(self):
+        self.serial = Serial(self.port, self.baud)
 
     def run(self):
         """Run the loop of getting values form the queue and sending them to the serial port.
@@ -54,5 +60,16 @@ class SerialTransmitterAsync(threading.Thread):
             formatted string that was sent to the serial
         """
         string_data = ">" + "".join([str(x).zfill(3) for x in value])
-        self.serial.write(bytes(string_data, "utf-8"))
-        return string_data
+
+        try:
+            if self.serial is None:
+                self._connect()
+                self.logger.info(f"Connected to {self.port}")
+            self.serial.write(bytes(string_data, "utf-8"))
+            self.error_logged = False
+        except IOError as e:
+            if not self.error_logged:
+                self.logger.error(f"Can't connect to the receiver: {e}")
+                self.error_logged = True
+            self.serial = None
+            time.sleep(1)
