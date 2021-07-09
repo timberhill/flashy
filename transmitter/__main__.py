@@ -42,7 +42,9 @@ if __name__ == "__main__":
             logger.info(f"No serial devices connected")
             time.wait(3)
         else:
-            settings.port = serial.tools.list_ports.comports()[0].device
+            settings.port = [
+                port for port in comports if "Bluetooth" not in port.device
+            ][0].device
 
     logger.info(f"Starting with settings from {settings_path}")
     logger.info(f"  -- Serial port: {settings.port}" +
