@@ -58,7 +58,7 @@ class ScreenReaderAsync(threading.Thread):
         # this is a hack to reduce flickering in macos caused by dragging windows
         # the code will skip pure black frames up to a *limit* in a row
         if platform == "darwin":
-            self._black_pixel_counts = [0] * len(self.index_order)
+            self._black_pixel_counts = [0] * self.settings.strip_size
             self._black_pixel_limit = 5
 
     def run(self):
@@ -116,7 +116,9 @@ class ScreenReaderAsync(threading.Thread):
                         self._black_pixel_counts[i] = 0
 
                 if item is not None:
-                    self.queue.put(i, item)
+                    self.queue.put(i,
+                        self._colour_correct(item, self.settings.colour_correction)
+                    )
 
     def _mean_rgb(self, rgb_values):
         """Calculate a mean value of an array of RGB values.
@@ -134,4 +136,22 @@ class ScreenReaderAsync(threading.Thread):
             sum(value[0] for value in rgb_values) // N,
             sum(value[1] for value in rgb_values) // N,
             sum(value[2] for value in rgb_values) // N,
+        )
+
+    def _colour_correct(self, rgb, correction):
+        """Apply a colour correction to an RGB value.
+
+        Args:
+            rgb (tuple/list): 3 RGB values
+            correction (tuple/list): 3 RGB correction values
+
+        Returns:
+            tuple: 3 RGB values
+        """
+        if all(value == 1 or value < 0 for value in correction):
+            return rgb
+
+        return tuple(
+            int(value*factor) if value*factor <= 255 else 255
+            for value, factor in zip(rgb, correction)
         )
