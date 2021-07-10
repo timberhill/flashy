@@ -15,8 +15,10 @@ class Settings:
     Args:
         path (str, optional): path to settings.json, defaults to 'settings/settings.json'
     """
-    def __init__(self, path="settings\\settings.json"):
-        self.settings_path = path
+    def __init__(self, path=None):
+        self.default_settings_path = "settings/default.json"
+        self.settings_path = path if path is not None \
+            else self.default_settings_path
         self.settings_dir = os.path.dirname(self.settings_path)
         self.logger = logging.getLogger("Settings")
         self.logger.info(f"Reading settings from {path}")
@@ -31,13 +33,15 @@ class Settings:
         Returns:
             settings (Settings): this object with the attributed loaded
         """
-        path = self.settings_path if path is None else path
-        with open(path, "r") as settings_file:
-            # set all the settings as class attributes
-            for key, value in json.load(settings_file).items():
-                value = self._normalise_profile(value) if key == "profile" else value
-                setattr(self, key, value)
-        
+        settings_path = self.settings_path if path is None else path
+        # set all the default settings as class attributes and
+        # then update the values with the custom settings
+        for path in [self.default_settings_path, settings_path]:
+            with open(path, "r") as settings_file:
+                for key, value in json.load(settings_file).items():
+                    value = self._normalise_profile(value) if key == "profile" else value
+                    setattr(self, key, value)
+
         self._normalise_settings()
         return self
     

@@ -4,7 +4,13 @@
     "strip_size":  1,
     "threads":     1,
     "fps_limit":   30,
-    "profile":     "profiles/single_1_2560x1440.json",
+    "profile":     {
+        "description": "Single LED in top left corner of the screen",
+        "map": {
+            "0": { "bbox" : [0, 10, 0, 10] }
+        }
+    },
+    "colour_correction": [1.0, 1.0, 1.0],
     "logfile":     null,
     "log_level":   "INFO"
 }

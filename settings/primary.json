@@ -1,11 +1,5 @@
 {
-    "port":        null,
-    "baud":        9600,
     "strip_size":  86,
-    "threads":     1,
-    "fps_limit":   30,
     "colour_correction": [1.0, 0.6, 0.5],
-    "profile":     "profiles/bottomrow_86_2560x1440.json",
-    "logfile":     null,
-    "log_level":   "INFO"
+    "profile":     "profiles/bottomrow_86_2560x1440.json"
 }
