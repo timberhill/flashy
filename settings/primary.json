@@ -1,5 +1,5 @@
 {
     "strip_size":  86,
-    "colour_correction": [1.0, 0.6, 0.5],
+    "colour_correction": [1.0, 0.65, 0.5],
     "profile":     "profiles/bottomrow_86_2560x1440.json"
 }
