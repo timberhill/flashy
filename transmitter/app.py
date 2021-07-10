@@ -25,7 +25,7 @@ class FlashyApp:
         """Set up the app and create all the threads.
         """
         # set up the queue
-        self.queue = QueueArray(length=self.settings.strip_size, size=5)
+        self.queue = QueueArray(length=self.settings.strip_size, size=3)
 
         # create the reader threads
         for i in range(self.settings.threads):

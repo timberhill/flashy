@@ -94,6 +94,10 @@ class ScreenReaderAsync(threading.Thread):
             time.sleep(time_left_in_frame)
 
     def _process_frame(self):
+        # if the queues are full, do not waste the CPU
+        if all(self.queue.full(i) for i in self.index_order):
+            return
+
         with Screenshot(bbox=self._bbox) as screenshot:
             # add the pixel values to a queue
             for i in self.index_order:
