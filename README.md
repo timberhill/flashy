@@ -126,5 +126,5 @@ A profile tells the code which pixels on the screen correspond to which LEDs. Sc
 
 It is quite handy to use python console to generate profiles for large numbers of LEDs. In this case:
 ```python
-{ str(i): { "bbox": [93 + i*192, 40, 98+i*192, 50] } for i in range(10) }
+{ str(i): { "bbox": [93+i*192, 40, 98+i*192, 50] } for i in range(10) }
 ```
