@@ -1,17 +1,22 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LED_PIN 12                // pin the LED strip is connected to
-#define LED_NUMBER 86             // number of LEDs in a strip
-#define MAXIMUM_BRIGHTNESS 127    // maximum brightness of all LEDs
-#define BAUDRATE 9600             // baud rate for serial communication
-#define TIMEOUT_ITERATIONS 10000  // play the shutdown animation after this many iterations without any serial data
+//////////// USER SETTINGS ////////////
+
+#define LED_PIN 12                // pin the LED strip is connected to [INT]
+#define LED_NUMBER 1              // number of LEDs in a strip [INT]
+#define MAXIMUM_BRIGHTNESS 127    // maximum brightness of all LEDs [BYTE]
+#define BAUDRATE 9600             // baud rate for serial communication [INT]
+#define TIMEOUT_ITERATIONS 10000  // play the shutdown animation after this many iterations without any serial data [INT]
+
+//////////// END OF USER SETTINGS ////////////
+
 
 // initialise the LED strip
 // docs: https://adafruit.github.io/Adafruit_NeoPixel/html/class_adafruit___neo_pixel.html
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUMBER, LED_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel onboard_pixel = Adafruit_NeoPixel(1, 8, NEO_GRB + NEO_KHZ800);
 
-// temp values
+// variables
 byte led_index = 0;
 byte led_red = 0;
 byte led_green = 0;
@@ -20,9 +25,7 @@ int unavailable_count = 0;
 bool onOffSwitch = true;  // false if the strip should be off
 int index = 0;
 
-//////////////////////////////////
-///////       MAIN        ////////
-//////////////////////////////////
+
 void setup()
 {
     // initialise the LED strip
@@ -31,6 +34,7 @@ void setup()
     strip.show();
 
     // initialise the onboard neopixel
+    // NOTE: this is aimed at Adafruit Flora
     onboard_pixel.begin();
     onboard_pixel.setBrightness(MAXIMUM_BRIGHTNESS);
     onboard_pixel.show();
@@ -43,15 +47,15 @@ void loop()
 {
     if (Serial.available())
     { 
+        // wait for the starting character
+        if (Serial.read() != '>')
+            return;
+
         // if the serial data is coming in, reset the variables used to shut down
         unavailable_count = 0;
         onOffSwitch = true;
-  
-        // keep reading serial data while the data is coming in
-        if (Serial.read() != '>')
-            return; // wait for the starting character
 
-        // starting character encountered, read the next 12 characters
+        // read the next 12 characters
         led_index = readSerialThreeDigitNumber();
         led_red = readSerialThreeDigitNumber();
         led_green = readSerialThreeDigitNumber();
@@ -59,6 +63,9 @@ void loop()
 
         // update an LED value accordingly
         updateLEDValue(led_index, led_red, led_green, led_blue);
+
+        // this block prevents from sending data to the strip for every LED update
+        // because that would be too slow
         if (index >= LED_NUMBER*0.41) {
           strip.show();
           onboard_pixel.show();
@@ -77,7 +84,6 @@ void loop()
         }
     }
 }
-//////////////////////////////////
 
 byte readSerialThreeDigitNumber()
 {
@@ -99,7 +105,7 @@ void updateLEDValue(byte i, byte r, byte g, byte b)
 
 void shutdownSequence()
 {
-    // old timey tv shutdown animation
+    // old timey tv shutdown animation, sort of
     int middle_pixel = LED_NUMBER / 2; // define the middle pixel
     int wait = 100 / LED_NUMBER;       // defines animation speed, independent of the length of the strip
     byte middle_pixel_brightness = 0;
@@ -119,9 +125,9 @@ void shutdownSequence()
 
         strip.show();
 
-        // wait for the animation frame
-        // the map() is so that the animation accelerates
-        delay(map(i, 0, middle_pixel - 1, wait * 5, wait / 5));
+        // wait for the next animation frame
+        // the map() makes the animation accelerate
+        delay(map(i, 0, middle_pixel-1, wait*5, wait/5));
     }
 
     // fade out the middle pixel
@@ -136,7 +142,7 @@ void shutdownSequence()
         onboard_pixel.show();
         strip.show();
 
-        // wait for the animation frame
+        // wait for the next animation frame
         delay(wait);
     }
 }

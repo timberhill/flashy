@@ -44,7 +44,7 @@ class Settings:
 
         self._normalise_settings()
         return self
-    
+
     def _normalise_settings(self):
         """Normalise settings values.
         """
