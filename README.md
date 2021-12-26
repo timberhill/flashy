@@ -25,13 +25,15 @@ Some coding exp because this is DIY af.
 
 ### Software
 
-- Windows / MacOS
+- Windows / Linux / MacOS
 
 - [Arduino IDE](https://www.arduino.cc/en/guide/windows) to upload the code to a board
 
 - [Python 3+](https://www.python.org/downloads/) and some packages:
 
     - Windows: `pip install pyserial pywin32 pyimage`
+
+    - Linux: `pip install pyserial mss`
 
     - MacOS: `pip install pyserial pyobjc-framework-Quartz`
 
@@ -51,9 +53,9 @@ I used this setup (different board, of course):
 
 ![board setup](https://www.eerkmans.nl/wp-content/uploads/2016/02/arduino_2.png)
 
-There are lots of tutorials that can help, like 
-[this](https://learn.adafruit.com/getting-started-with-flora/blink-onboard-neopixel), 
-[this](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels) 
+There are lots of tutorials that can help, like
+[this](https://learn.adafruit.com/getting-started-with-flora/blink-onboard-neopixel),
+[this](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
 and/or [this](https://www.eerkmans.nl/powering-lots-of-leds-from-arduino/).
 
 1. Solder the circuit as shown above
@@ -96,7 +98,7 @@ A profile tells the code which pixels on the screen correspond to which LEDs. Sc
 
 - `description`: some explanation of what the profile is
 - `map`: mapping LED pixel indices to sets of screen pixels.
-    
+
     Two options there:
     - `bbox`: a list of four numbers defining a bounding box by top left and bottom right pixel coordinates, i.e. `[x1, y1, x2, y2]`
     - `pixels`: s list of `[x, y]` coordinates of the screen pixel coordinates

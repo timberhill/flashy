@@ -10,7 +10,7 @@ if platform == "darwin":
 elif platform == "win32":
     from .bitblt_screenshot import BitBltScreenshot as Screenshot
 elif platform == "linux" or platform == "linux2":
-    raise NotImplementedError("Looks like you're trying to run this in linux, but flashy only works on windows and macos for now.")
+    from .mss_screenshot import MSSScreenshot as Screenshot
 
 
 class ScreenReaderAsync(threading.Thread):
@@ -21,7 +21,7 @@ class ScreenReaderAsync(threading.Thread):
         name (str): name of the thread
         index_range (list): range of LED indices to read data from
         queue (queue.Queue): queue to add the values to
-    
+
     Attributes:
         settings (settings.Settings): flashy settings object
         name (str): name of the thread
