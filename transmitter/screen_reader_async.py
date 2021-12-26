@@ -60,6 +60,10 @@ class ScreenReaderAsync(threading.Thread):
         if platform == "darwin":
             self._black_pixel_counts = [0] * self.settings.strip_size
             self._black_pixel_limit = 5
+        # similar in linux, at least arch linux, in this case just median
+        if platform == "linux" or platform == "linux2":
+            self._previous = [[]] * self.settings.strip_size
+            self._previous_count = 5
 
     def run(self):
         """Run the loop of reading the pixel values and adding them to the queue.
@@ -117,6 +121,16 @@ class ScreenReaderAsync(threading.Thread):
                     elif item != (0, 0, 0):
                         self._black_pixel_counts[i] = 0
 
+                if platform == "linux" or platform == "linux2":
+                    self._previous[i].append(item)
+                    if len(self._previous[i]) >= 5:
+                        item = [
+                            self._median([x[i] for x in self._previous[i]])
+                            for i in range(3)
+                        ]
+                        self._previous[i].pop(0)
+
+
                 if item is not None:
                     self.queue.put(i,
                         self._colour_correct(item, self.settings.colour_correction)
@@ -157,3 +171,13 @@ class ScreenReaderAsync(threading.Thread):
             int(value*factor) if value*factor <= 255 else 255
             for value, factor in zip(rgb, correction)
         )
+
+    def _median(self, lst):
+        sortedLst = sorted(lst)
+        lstLen = len(lst)
+        index = (lstLen - 1) // 2
+
+        if (lstLen % 2):
+            return sortedLst[index]
+        else:
+            return (sortedLst[index] + sortedLst[index + 1])/2.0
