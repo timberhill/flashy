@@ -73,6 +73,8 @@ and/or [this](https://www.eerkmans.nl/powering-lots-of-leds-from-arduino/).
     - OR just run the script in this repo (`flashy.bat <settings_name>`/`flashy.sh <settings_name>`)
     - The LEDs should light up at this point if it was set up correctly
 
+_NOTE: in Linux, you might need to add your user to a group that is allowed serial communication, or just run it as root (not recommended)_
+
 ## Settings
 
 Settings have a few values you might want to tweak. But mainly you want to change `strip_size` and `profile`.
