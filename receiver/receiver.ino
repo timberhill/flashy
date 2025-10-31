@@ -3,7 +3,7 @@
 //////////// USER SETTINGS ////////////
 
 #define LED_PIN 12                // pin the LED strip is connected to [INT]
-#define LED_NUMBER 1              // number of LEDs in a strip [INT]
+#define LED_NUMBER 86             // number of LEDs in a strip [INT]
 #define MAXIMUM_BRIGHTNESS 127    // maximum brightness of all LEDs [BYTE]
 #define BAUDRATE 9600             // baud rate for serial communication [INT]
 #define TIMEOUT_ITERATIONS 10000  // play the shutdown animation after this many iterations without any serial data [INT]
@@ -105,44 +105,12 @@ void updateLEDValue(byte i, byte r, byte g, byte b)
 
 void shutdownSequence()
 {
-    // old timey tv shutdown animation, sort of
-    int middle_pixel = LED_NUMBER / 2; // define the middle pixel
-    int wait = 100 / LED_NUMBER;       // defines animation speed, independent of the length of the strip
-    byte middle_pixel_brightness = 0;
-
-    // turn off the pixels starting from the edges of the strip
-    // at the same time, brighten the middle pixel
-    for (int i = 0; i < middle_pixel; i++)
-    {
-        if (Serial.available() > 0)
-            return; // stop the animation if there is serial data coming in
-
+    for (int i = 0; i < LED_NUMBER / 2; i++) {
         strip.setPixelColor(i, strip.Color(0, 0, 0));
         strip.setPixelColor(LED_NUMBER - i - 1, strip.Color(0, 0, 0));
-
-        middle_pixel_brightness = map(i, 0, middle_pixel - 1, 0, 255);
-        strip.setPixelColor(middle_pixel, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
-
         strip.show();
-
-        // wait for the next animation frame
-        // the map() makes the animation accelerate
-        delay(map(i, 0, middle_pixel-1, wait*5, wait/5));
     }
-
-    // fade out the middle pixel
-    for (int i = 0; i < LED_NUMBER * 3; i++)
-    {
-        if (Serial.available() > 0)
-            return; // stop the animation if there is serial data coming in
-
-        middle_pixel_brightness = map(i, 0, LED_NUMBER * 3 - 1, 255, 0);
-        strip.setPixelColor(middle_pixel, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
-        onboard_pixel.setPixelColor(0, strip.Color(middle_pixel_brightness, middle_pixel_brightness, middle_pixel_brightness));
-        onboard_pixel.show();
-        strip.show();
-
-        // wait for the next animation frame
-        delay(wait);
-    }
+    onboard_pixel.setPixelColor(0, strip.Color(MAXIMUM_BRIGHTNESS/10, MAXIMUM_BRIGHTNESS/25, MAXIMUM_BRIGHTNESS/40));
+    onboard_pixel.show();
+    return;
 }
