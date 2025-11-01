@@ -57,4 +57,8 @@ if __name__ == "__main__":
     logger.info(f"  --    Log file: {settings.logfile}")
 
     app = FlashyApp(settings)
-    app.start()
+    while (True):            
+        try:
+            app.start()
+        except Exception as e:
+            logger.error(e.message)
