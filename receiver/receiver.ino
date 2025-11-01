@@ -6,7 +6,7 @@
 #define LED_NUMBER 86             // number of LEDs in a strip [INT]
 #define MAXIMUM_BRIGHTNESS 127    // maximum brightness of all LEDs [BYTE]
 #define BAUDRATE 9600             // baud rate for serial communication [INT]
-#define TIMEOUT_ITERATIONS 10000  // play the shutdown animation after this many iterations without any serial data [INT]
+#define TIMEOUT_ITERATIONS 20000  // play the shutdown animation after this many iterations without any serial data [INT]
 
 //////////// END OF USER SETTINGS ////////////
 
@@ -110,7 +110,7 @@ void shutdownSequence()
         strip.setPixelColor(LED_NUMBER - i - 1, strip.Color(0, 0, 0));
         strip.show();
     }
-    onboard_pixel.setPixelColor(0, strip.Color(MAXIMUM_BRIGHTNESS/10, MAXIMUM_BRIGHTNESS/25, MAXIMUM_BRIGHTNESS/40));
+    onboard_pixel.setPixelColor(0, strip.Color(0,0,0));
     onboard_pixel.show();
     return;
 }
