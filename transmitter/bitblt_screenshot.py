@@ -27,8 +27,11 @@ class BitBltScreenshot:
         self.memdc = self.dc.CreateCompatibleDC()
         self.bitmap = win32ui.CreateBitmap()
         self.bitmap.CreateCompatibleBitmap(self.dc, self.size[0], self.size[1])
-        self.memdc.SelectObject(self.bitmap)
-        self.memdc.BitBlt((0, 0), self.size, self.dc, self.position, win32con.SRCCOPY)
+        self.memdc.SelectObject(self.bitmap)        
+        try:
+            self.memdc.BitBlt((0, 0), self.size, self.dc, self.position, win32con.SRCCOPY)
+        except Exception as e:
+            self.logger.error(e.message)
         self.bits = self.bitmap.GetBitmapBits(True)
         self.screenshot = Image.frombuffer('RGB', self.size, self.bits, 'raw', 'BGRX', 0, 1)
         grabtime_ms = (datetime.utcnow() - start).total_seconds() * 1000
